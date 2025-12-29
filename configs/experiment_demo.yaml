@@ -1,0 +1,5 @@
+experiment:
+  generation_format: "image"
+
+generator_config:
+  test: "test"
