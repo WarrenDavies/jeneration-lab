@@ -13,9 +13,9 @@ class Experiment():
         self.start_timestamp_str = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         self.config = config
         self.setup_experiment_folders()
-        # self.generator = self.get_generator()
-        # self.generator.create_pipeline()
-        
+        self.generator_config = self.process_generator_config()
+        self.generator = self.get_generator()
+        self.generator.create_pipeline()
         # self.variables = self.define_variables()
 
 
@@ -30,11 +30,17 @@ class Experiment():
         self.text_output_folder.mkdir(parents=True, exist_ok=True)
 
 
-    def get_generator(self):
+    def process_generator_config(self):
+        generator_config = self.config["generator"]
+        generator_config["image_save_folder"] = self.images_output_folder
+        
+        return generator_config
 
+
+    def get_generator(self):
         generation_format = self.config["experiment"]["generation_format"]
         generator_registry = generator_registries[generation_format]
-        generator = generator_registry.get_model_class(self.config["generator"])
+        generator = generator_registry.get_model_class(self.generator_config)
         
         return generator
 
