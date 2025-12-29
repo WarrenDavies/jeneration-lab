@@ -9,13 +9,9 @@ readme = "README.md"
 packages = [{include = "jenerationlab", from = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.12,<3.15"
 streamlit = "^1.30.0"
-pandas = "^2.2.0"
-plotly = "^5.18.0"
-sqlalchemy = "^2.0.0"  # For the storage layer
-pyyaml = "^6.0.1"      # For reading experiment configs
-# Your existing tools
+pyyaml = "^6.0.1"
 imagejenerator = "*"
 textjenerator = "*"
 jenerationutils = "*"
@@ -25,10 +21,9 @@ pytest = "^8.0.0"
 black = "^24.1.0"
 
 [tool.poetry.scripts]
-# This allows you to run 'jenerate-run' from the terminal
-jenerate-run = "jenerationlab.core.runner:main"
+jenlab-run = "jenerationlab.core.runner:main"
 # This allows you to run the UI easily
-jenerate-ui = "jenerationlab.app.launcher:main"
+jenlab-ui = "jenerationlab.app.launcher:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
