@@ -26,10 +26,10 @@ variables:
   num_inference_steps:
     dtype: "int"
     min: 1
-    max: 20
+    max: 2
     step: 1
   guidance_scale:
     dtype: "int"
-    min: 5
+    min: 8
     max: 8
     step: 1

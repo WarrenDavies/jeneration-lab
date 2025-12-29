@@ -14,14 +14,14 @@ class Experiment():
     def __init__(self, config):
         """
         """
-        self.start_timestamp_str = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         self.config = config
+        self.start_timestamp_str = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         self.setup_experiment_folders()
         self.generator_config = self.process_generator_config()
         self.generator = self.get_generator()
         self.generator.create_pipeline()
-        self.define_variables()
-        self.get_inference_configs()
+        self.variables = self.define_variables()
+        self.inference_configs = self.get_inference_configs()
 
     def setup_experiment_folders(self):
         self.experiment_folder = Path("outputs/") / Path(self.start_timestamp_str)
@@ -56,7 +56,7 @@ class Experiment():
             variable = variable_registry.get_object(variable_config)
             variable.name = variable_name
             variables.append(variable)
-        self.variables = variables
+        return variables
 
 
     def get_inference_configs(self):
@@ -67,7 +67,7 @@ class Experiment():
                 variable.name: value 
                 for variable, value in zip(self.variables, inference_param_combo)
             })
-        self.inference_configs = inference_configs
+        return inference_configs
 
 
     def run(self):
