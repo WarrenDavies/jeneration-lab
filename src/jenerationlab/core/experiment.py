@@ -1,4 +1,5 @@
 import datetime
+from pathlib import Path
 
 from jenerationlab.core.generators import generator_registries
 
@@ -11,10 +12,22 @@ class Experiment():
         """
         self.start_timestamp_str = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         self.config = config
-        self.generator = self.get_generator()
-        self.generator.create_pipeline()
+        self.setup_experiment_folders()
+        # self.generator = self.get_generator()
+        # self.generator.create_pipeline()
         
         # self.variables = self.define_variables()
+
+
+    def setup_experiment_folders(self):
+        self.experiment_folder = Path("outputs/") / Path(self.start_timestamp_str)
+        self.experiment_folder.mkdir(parents=True, exist_ok=True)
+
+        self.images_output_folder = Path(self.experiment_folder) / Path("images")
+        self.images_output_folder.mkdir(parents=True, exist_ok=True)
+
+        self.text_output_folder = Path(self.experiment_folder) / Path("text")
+        self.text_output_folder.mkdir(parents=True, exist_ok=True)
 
 
     def get_generator(self):
@@ -32,4 +45,5 @@ class Experiment():
 
 
     def run(self):
-        pass
+        self.generator.run_pipeline()
+        self.generator.save_image()
