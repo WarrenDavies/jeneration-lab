@@ -12,7 +12,7 @@ generator:
   scheduler: "EulerDiscreteScheduler"
   height: 512
   width: 512
-  num_inference_steps: 40
+  num_inference_steps: 4
   guidance_scale: 10
   images_to_generate: 1
   seeds: []
@@ -24,10 +24,12 @@ generator:
 
 variables:
   num_inference_steps:
+    dtype: "int"
     min: 1
-    max: 3
+    max: 20
     step: 1
   guidance_scale:
-    min: 7
+    dtype: "int"
+    min: 5
     max: 8
     step: 1

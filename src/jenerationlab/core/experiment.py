@@ -1,6 +1,10 @@
 import datetime
 from pathlib import Path
+from itertools import product
 
+from jenerationutils.benchmarker.benchmarker import Benchmarker
+
+from jenerationlab.variables import registry as variable_registry
 from jenerationlab.core.generators import generator_registries
 
 
@@ -16,8 +20,8 @@ class Experiment():
         self.generator_config = self.process_generator_config()
         self.generator = self.get_generator()
         self.generator.create_pipeline()
-        # self.variables = self.define_variables()
-
+        self.define_variables()
+        self.get_inference_configs()
 
     def setup_experiment_folders(self):
         self.experiment_folder = Path("outputs/") / Path(self.start_timestamp_str)
@@ -46,10 +50,32 @@ class Experiment():
 
 
     def define_variables(self):
-        for variable in self.config["variables"]:
-            pass
+        variables = []
+        for variable_name in self.config["variables"]:
+            variable_config = self.config["variables"][variable_name]
+            variable = variable_registry.get_object(variable_config)
+            variable.name = variable_name
+            variables.append(variable)
+        self.variables = variables
+
+
+    def get_inference_configs(self):
+        inference_configs = []
+        inference_param_combos = product(*[variable.values for variable in self.variables])
+        for inference_param_combo in inference_param_combos:
+            inference_configs.append({
+                variable.name: value 
+                for variable, value in zip(self.variables, inference_param_combo)
+            })
+        self.inference_configs = inference_configs
 
 
     def run(self):
-        self.generator.run_pipeline()
-        self.generator.save_image()
+        for inference_config in self.inference_configs:
+            print(inference_config)
+            self.generator.config.update(inference_config)
+            with Benchmarker() as benchmarker:
+                self.generator.run_pipeline()
+            print(benchmarker.execution_time)
+            self.generator.save_image()
+        
