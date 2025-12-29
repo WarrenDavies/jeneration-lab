@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "jenerationlab"
+version = "0.1.0"
+description = "GenAI experimentation suite for image and text generation."
+authors = ["Warren Davies"]
+license = "MIT"
+readme = "README.md"
+# This ensures poetry looks in the src folder
+packages = [{include = "jenerationlab", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.15"
+streamlit = "^1.30.0"
+pyyaml = "^6.0.1"
+imagejenerator = "*"
+textjenerator = "*"
+jenerationutils = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+black = "^24.1.0"
+
+[tool.poetry.scripts]
+jenlab-run = "jenerationlab.core.runner:main"
+# This allows you to run the UI easily
+jenlab-ui = "jenerationlab.app.launcher:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
