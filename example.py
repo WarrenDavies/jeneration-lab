@@ -5,11 +5,14 @@ from jenerationlab.core.runner import Runner
 from jenerationlab.storage.storage_manager import StorageManager
 
 with open("configs/experiment_demo.yaml", 'r') as stream:
-    config = yaml.safe_load(stream)
+    experiment_config = yaml.safe_load(stream)
 
-experiment = Experiment(config)
-storage_manager = StorageManager(config)
-runner = Runner(config, experiment, storage_manager)
+with open("configs/core_config.yaml", 'r') as stream:
+    core_config = yaml.safe_load(stream)
+
+experiment = Experiment(experiment_config)
+storage_manager = StorageManager(core_config, experiment_config)
+runner = Runner(core_config, experiment_config, experiment, storage_manager)
 runner.run()
 
 

@@ -1,8 +1,5 @@
 experiment:
   generation_format: "image"
-  output_data_type: "csv"
-  save_image_gen_stats: True
-  data_source_location: "image_gen_stats.csv"
 
 generator:
   model: "stable-diffusion-v1-5"
