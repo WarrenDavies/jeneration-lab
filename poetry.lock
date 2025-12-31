@@ -619,14 +619,14 @@ all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2
 
 [[package]]
 name = "imagejenerator"
-version = "2.0.0"
+version = "2.1.0"
 description = "Image generation suite."
 optional = false
 python-versions = "<3.15,>=3.10"
 groups = ["main"]
 files = [
-    {file = "imagejenerator-2.0.0-py3-none-any.whl", hash = "sha256:72979d0460121e4b9dd6d6482eaad9a928ec3ba40d5a092e5fbfd0d67212ac96"},
-    {file = "imagejenerator-2.0.0.tar.gz", hash = "sha256:6ddeb219b2784e6f2fbcb527ff4d4855cf0d11f7fe4bcee452610f0aec70a6d9"},
+    {file = "imagejenerator-2.1.0-py3-none-any.whl", hash = "sha256:617266f7c7c4680bf4f6acefa50b74780e90f8603fc6aa4c6dbda6c4d2fa4852"},
+    {file = "imagejenerator-2.1.0.tar.gz", hash = "sha256:759064f3c346318c3c8dd422403837d3957e0af5781f32bc9960e7a31fd47aaf"},
 ]
 
 [package.dependencies]
@@ -2804,4 +2804,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.15"
-content-hash = "7c8caf794022d9ddcf539d6e0bad86fffcf2e9afdf7f30fe88fe62358f58d78f"
+content-hash = "ea05209e26823d0c44bb04c00c0c94f8bf6cf4a0566c3a3018f0ab49728a1fd0"
