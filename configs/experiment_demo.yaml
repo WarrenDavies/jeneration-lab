@@ -1,4 +1,6 @@
 experiment:
+  experiment_name: "Test"
+  experiment_description: "A test experiment"
   generation_format: "image"
 
 generator:
@@ -28,5 +30,5 @@ variables:
   guidance_scale:
     dtype: "int"
     min: 8
-    max: 8
+    max: 9
     step: 1

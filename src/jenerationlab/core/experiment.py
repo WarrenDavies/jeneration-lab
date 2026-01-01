@@ -2,6 +2,7 @@ import datetime
 import sys
 from pathlib import Path
 from itertools import product
+import uuid
 
 from jenerationutils.benchmarker.benchmarker import Benchmarker
 
@@ -15,6 +16,7 @@ class Experiment():
     def __init__(self, config):
         """
         """
+        self.experiment_id = uuid.uuid4().hex[:8]
         self.config = config
         self.generator_config = self.process_generator_config()
         self.generator = self.get_generator()

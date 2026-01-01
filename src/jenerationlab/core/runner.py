@@ -21,7 +21,11 @@ class Runner():
         self.storage_manager = storage_manager
         self.storage_manager.setup_experiment_folders(self.start_timestamp_str)
         self.GenerationRecordClass = recorder_registry.get_class(core_config["output_data_type"])
-        self.run_context = {**experiment_config["experiment"], **experiment_config["generator"]}
+        self.run_context = {
+            "experiment_id": self.experiment.experiment_id,
+            **experiment_config["experiment"], 
+            **experiment_config["generator"]
+        }
         self.ParamsSchema = self.get_params_schema()
 
     
@@ -42,6 +46,37 @@ class Runner():
         return ParamsSchema
 
 
+    def build_run_context(self, benchmarker, artifact_bundle, filename):
+
+        run_context = self.run_context.copy()
+
+        run_context["timestamp"] = self.start_timestamp_str
+        run_context["batch_generation_time"] = benchmarker.execution_time
+        run_context["generation_time"] = benchmarker.execution_time / self.experiment.generator.batch_size
+        run_context["params"] = dict(self.ParamsSchema(**{
+            **self.experiment.generator.config,
+            **artifact_bundle
+        }))
+        run_context["filename"] = filename
+        run_context["output_path"] = str(self.storage_manager.output_folder)
+
+        return run_context
+
+
+    def normalize_to_bundles(raw_output):
+        items = raw_output if isinstance(raw_output, list) else [raw_output]
+        normalized = []
+        for item in items:
+            if isinstance(item, dict):
+                normalized.append(item)
+            else:
+                normalized.append({
+                    "artifact": item, 
+                    "seed": None
+                })
+        return normalized
+
+
     def run(self):
         """
         """
@@ -49,20 +84,24 @@ class Runner():
             self.experiment.generator.config.update(inference_config)
             
             with Benchmarker() as benchmarker:
-                self.storage_manager.images = self.experiment.generator.run_pipeline()
-            self.storage_manager.save()
+                batch = self.experiment.generator.run_pipeline()
+            
+            artifacts = [item["artifact"] for item in batch]
+            self.storage_manager.artifacts.extend(artifacts)
+            batch_filenames = self.storage_manager.save(artifacts)
 
-            self.run_context["timestamp"] = self.start_timestamp_str
-            self.run_context["batch_generation_time"] = benchmarker.execution_time
-            self.run_context["generation_time"] = benchmarker.execution_time / self.experiment.generator.batch_size
-            self.run_context["params"] = dict(self.ParamsSchema(**self.experiment.generator.config))
-            self.run_context["filename"] = self.storage_manager.filenames[-1]
-            self.run_context["output_path"] = str(self.storage_manager.images_output_folder)
+            for i, artifact_bundle in enumerate(batch):
 
-            generation_metadata_record = self.GenerationRecordClass(
-                schema=BaseSchema,
-                generation_metadata = self.run_context
-            )
-            data_row = generation_metadata_record.create_data_row()
-            self.storage_manager.data_connection.append_data(data_row)
+                run_context = self.build_run_context(
+                    benchmarker, 
+                    artifact_bundle,
+                    batch_filenames[i]
+                )
+
+                generation_metadata_record = self.GenerationRecordClass(
+                    schema=BaseSchema,
+                    generation_metadata = run_context
+                )
+                data_row = generation_metadata_record.create_data_row()
+                self.storage_manager.data_connection.append_data(data_row)
             
