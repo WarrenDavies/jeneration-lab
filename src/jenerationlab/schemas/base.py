@@ -9,7 +9,8 @@ class BaseSchema(BaseModel):
     timestamp: str = ""
     model: str = ""
     device: str = ""
-    inference_time: float | None = None
+    generation_time: float | None = None
+    batch_generation_time: float | None = None
 
     params: Dict[str, Any] = {} 
     extras: Dict[str, Any] = {}

@@ -15,8 +15,6 @@ class StorageManager():
         self.images = []
         self.save_timestamp = ""
         self.filenames = []
-        # print(self.data_connection)
-        # sys.exit()
         
 
     def setup_experiment_folders(self, experiment_folder_name):

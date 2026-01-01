@@ -47,16 +47,22 @@ class Runner():
         """
         for inference_config in self.experiment.inference_configs:
             self.experiment.generator.config.update(inference_config)
+            
             with Benchmarker() as benchmarker:
                 self.storage_manager.images = self.experiment.generator.run_pipeline()
-            params_metadata = self.ParamsSchema(**self.experiment.generator.config)
+            self.storage_manager.save()
+
+            self.run_context["timestamp"] = self.start_timestamp_str
+            self.run_context["batch_generation_time"] = benchmarker.execution_time
+            self.run_context["generation_time"] = benchmarker.execution_time / self.experiment.generator.batch_size
+            self.run_context["params"] = dict(self.ParamsSchema(**self.experiment.generator.config))
+            self.run_context["filename"] = self.storage_manager.filenames[-1]
+            self.run_context["output_path"] = str(self.storage_manager.images_output_folder)
+
             generation_metadata_record = self.GenerationRecordClass(
                 schema=BaseSchema,
-                generation_metadata = {
-                    **self.experiment_config["generator"], 
-                    "params": dict(params_metadata)
-                }
+                generation_metadata = self.run_context
             )
             data_row = generation_metadata_record.create_data_row()
             self.storage_manager.data_connection.append_data(data_row)
-            self.storage_manager.save()
+            
