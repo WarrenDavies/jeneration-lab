@@ -1,12 +1,14 @@
 import datetime
+import sys
 from pathlib import Path
 from itertools import product
+import uuid
 
 from jenerationutils.benchmarker.benchmarker import Benchmarker
 
 from jenerationlab.variables import registry as variable_registry
 from jenerationlab.core.generators import generator_registries
-
+from jenerationlab.storage.storage_manager import StorageManager
 
 class Experiment():
     """
@@ -14,29 +16,18 @@ class Experiment():
     def __init__(self, config):
         """
         """
+        self.experiment_id = uuid.uuid4().hex[:8]
         self.config = config
-        self.start_timestamp_str = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        self.setup_experiment_folders()
         self.generator_config = self.process_generator_config()
         self.generator = self.get_generator()
-        self.generator.create_pipeline()
         self.variables = self.define_variables()
         self.inference_configs = self.get_inference_configs()
-
-    def setup_experiment_folders(self):
-        self.experiment_folder = Path("outputs/") / Path(self.start_timestamp_str)
-        self.experiment_folder.mkdir(parents=True, exist_ok=True)
-
-        self.images_output_folder = Path(self.experiment_folder) / Path("images")
-        self.images_output_folder.mkdir(parents=True, exist_ok=True)
-
-        self.text_output_folder = Path(self.experiment_folder) / Path("text")
-        self.text_output_folder.mkdir(parents=True, exist_ok=True)
+        self.generator.create_pipeline()
 
 
     def process_generator_config(self):
         generator_config = self.config["generator"]
-        generator_config["image_save_folder"] = self.images_output_folder
+        generator_config["image_save_folder"] = self.config["generator"]["image_save_folder"]
         
         return generator_config
 
@@ -48,7 +39,7 @@ class Experiment():
         
         return generator
 
-
+        
     def define_variables(self):
         variables = []
         for variable_name in self.config["variables"]:

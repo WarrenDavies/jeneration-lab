@@ -1,8 +1,7 @@
 experiment:
+  experiment_name: "Test"
+  experiment_description: "A test experiment"
   generation_format: "image"
-  output_data_type: "csv"
-  save_image_gen_stats: True
-  data_source_location: "image_gen_stats.csv"
 
 generator:
   model: "stable-diffusion-v1-5"
@@ -31,5 +30,5 @@ variables:
   guidance_scale:
     dtype: "int"
     min: 8
-    max: 8
+    max: 9
     step: 1
