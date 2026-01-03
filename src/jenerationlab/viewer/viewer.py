@@ -1,91 +1,95 @@
-from pathlib import Path
-import yaml
-import json
-
-from PIL import Image
 import streamlit as st
 import pandas as pd
+from pathlib import Path
 
 from jenerationlab.viewer import utils
 
 
-with open("configs/core_config.yaml", 'r') as stream:
-    core_config = yaml.safe_load(stream)
+config = utils.get_config()
 
-outputs_path = Path(core_config["outputs_path"])
-data_source_path = Path(core_config["data_source_location"])
 
-experiments_folders = [p.name for p in outputs_path.iterdir() if p.is_dir()]
+#############################
+####### Process Data ########
+#############################
 df_all_experiments = utils.load_experiment_results(
-    data_source_path,
-    experiments_folders,
-    data_source_path.stat().st_mtime
+    config["data_source_path"],
+    config["experiments_folders"],
+    config["data_source_path"].stat().st_mtime
+)
+
+df_all_experiments = utils.expand_json_to_cols(
+    df_all_experiments,
+    "params"
 )
 experiment_location_map = utils.get_experiment_list(
     df_all_experiments
 )
 experiment_dropdown_options = list(experiment_location_map.keys())
 
-
-# front-end
-
 st.title("Jeneration Lab")
 st.write("Experiment Result Viewer.")
+st.sidebar.header("Filters")
 
+
+############################
+######### Filters ##########
+############################
 selected_experiment = st.selectbox(
     "Select experiment",
     experiment_dropdown_options,
-    index=0    
+    index=0
 )
 
 df_selected_experiment = utils.apply_experiment_filter(
-    df_all_experiments, 
+    df_all_experiments,
     selected_experiment,
     experiment_location_map
 )
 
-
-
-
-
-st.sidebar.header("Filters")
-
-min_steps = int(df_selected_experiment["num_inference_steps"].min())
-max_steps = int(df_selected_experiment["num_inference_steps"].max())
-steps_range = st.sidebar.slider(
-    "Select Inference Steps Range",
-    min_value=min_steps,
-    max_value=max_steps,
-    value=(min_steps, max_steps),
-    step=1
+steps_range = utils.add_range_filter(
+    df_selected_experiment,
+    "num_inference_steps", 
+    1,
+    "Select Inference Steps Range"
 )
-df_selected_experiment = df_selected_experiment[
-    (df_selected_experiment["num_inference_steps"] >= steps_range[0]) & 
-    (df_selected_experiment["num_inference_steps"] <= steps_range[1])
-]
+
+df_selected_experiment = utils.apply_range_filter(
+    df_selected_experiment,
+    "num_inference_steps",
+    steps_range
+)
+
+cfg_range = utils.add_range_filter(
+    df_selected_experiment,
+    "guidance_scale", 
+    1,
+    "Select Guidance Scale Range"
+)
+
+df_selected_experiment = utils.apply_range_filter(
+    df_selected_experiment,
+    "guidance_scale",
+    cfg_range
+)
+
 selected_files = df_selected_experiment["filename"].to_list()
 
 
+############################
+#### Display Image Grid ####
+############################
 image_dir = experiment_location_map[selected_experiment]["output_path"]
 images = sorted(Path(image_dir).glob('*'))
-
 images = [image for image in images if image.name in selected_files]
 
 if len(images) == 0:
     st.write("No images found for this experiment.")
     st.write("The experiment folder may have been deleted, or you may need to chill out on your filtering a bit.")
-cols = st.columns(3)
+
+utils.render_image_grid(images, df_all_experiments, 3)
 
 
-for i, img_path in enumerate(images):
-    with cols[i % 3]:
-        
-        img = Image.open(img_path)
-        st.image(img, caption=img_path.name, use_container_width=True)
-
-        params_to_display = utils.get_artifact_params(
-            df_all_experiments,
-            img_path.name
-        )
-        utils.display_artifact_stats(params_to_display, ["num_inference_steps", "guidance_scale"])
+############################
+##### Display Raw Data #####
+############################
 st.dataframe(df_selected_experiment)

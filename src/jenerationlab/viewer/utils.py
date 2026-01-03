@@ -1,11 +1,32 @@
 from pathlib import Path
 import json
+import yaml
 
+from PIL import Image
 import pandas as pd
 import numpy as np
 import streamlit as st
 
 from jenerationlab.viewer import constants
+
+
+def get_config():
+    with open("configs/core_config.yaml", 'r') as stream:
+        core_config = yaml.safe_load(stream)
+
+    core_config["outputs_path"] = Path(core_config["outputs_path"])
+    core_config["data_source_path"] = Path(
+        core_config["data_source_location"]
+    )
+
+    core_config["experiments_folders"] = [
+        p.name 
+        for p in core_config["outputs_path"].iterdir() 
+        if p.is_dir()
+    ]
+
+    return core_config
+
 
 def get_mtime(path: Path):
     return path.stat().st_mtime
@@ -21,6 +42,7 @@ def load_experiment_results(exp_path, experiments_folders, mtime):
     experiment_exists = df["timestamp"].isin(experiments_folders)
     df = df[experiment_exists]
     return df
+
 
 @st.cache_data
 def get_experiment_list(df):
@@ -41,11 +63,25 @@ def get_experiment_list(df):
     return experiment_selectors
 
 
+def expand_json_to_cols(df, json_col):
+    dicts = df[json_col].apply(json.loads)
+    df_params = pd.json_normalize(dicts)
+    df_base = df.drop(columns=[json_col]).reset_index(drop=True)
+    df = pd.concat(
+        [df_base, df_params], 
+        axis=1
+    )
+    return df
+
+
 def apply_experiment_filter(
     df_all_experiments,
     selected_experiment,
     experiment_location_map
 ):
+    if selected_experiment == "-- All --":
+        return df_all_experiments
+
     selected_experiment_id = (
         experiment_location_map[selected_experiment]["experiment_id"]
     )
@@ -55,23 +91,43 @@ def apply_experiment_filter(
     df_selected_experiment = (
         df_all_experiments[selected_experiment_mask]
     )
-    dicts = df_selected_experiment['params'].apply(json.loads)
-    df_params = pd.json_normalize(dicts)
-    df_base = df_selected_experiment.drop(columns=['params']).reset_index(drop=True)
-    df_selected_experiment = pd.concat(
-        [df_base, df_params], 
-        axis=1
-    )
+
     return df_selected_experiment
 
 
-def get_artifact_params(df, filename):
-    run_row_mask = df["filename"] == filename
-    df_run_params = df.loc[run_row_mask, "params"]
-    params = df_run_params.iloc[0]
-    params = json.loads(params)
+def add_range_filter(df, col, step, title):
+    min_value = int(df[col].min())
+    max_value = int(df[col].max())
+    if min_value == max_value:
+        max_value += 1
+    range_ = st.sidebar.slider(
+        title,
+        min_value=min_value,
+        max_value=max_value,
+        value=(min_value, max_value),
+        step=step
+    )
+    return range_
 
-    return params
+
+def apply_range_filter(df, col, range_):
+    df = df.copy()
+    df = df[
+        (df[col] >= range_[0]) & 
+        (df[col] <= range_[1])
+    ]
+    return df
+
+
+def get_artifact_params(df, filename):
+    # run_row_mask = df["filename"] == filename
+    # df_run_params = df.loc[run_row_mask, "params"]
+    # params = df_run_params.iloc[0]
+    # params = json.loads(params)
+
+    params = df[df["filename"] == filename].to_dict(orient="records")
+
+    return params[0]
 
 
 def get_pretty_name(stat):
@@ -90,3 +146,22 @@ def display_artifact_stats(params, stats):
     if lines:
         st.markdown("<br>".join(lines), unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
+
+
+def render_image_grid(images, df, no_of_cols):
+    cols = st.columns(no_of_cols)
+    for i, img_path in enumerate(images):
+        with cols[i % no_of_cols]:
+            
+            img = Image.open(img_path)
+            st.image(img, caption=img_path.name, use_container_width=True)
+
+            params_to_display = get_artifact_params(
+                df,
+                img_path.name
+            )
+            
+            display_artifact_stats(
+                params_to_display, 
+                ["num_inference_steps", "guidance_scale"]
+            )
