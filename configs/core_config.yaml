@@ -1,2 +1,3 @@
 output_data_type: "csv"
 data_source_location: "./data/experiment_results.csv"
+outputs_path: "./outputs"
