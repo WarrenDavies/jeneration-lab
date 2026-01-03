@@ -9,6 +9,7 @@ generator:
   device: "cuda"
   enable_attention_slicing: True
   scheduler: "EulerDiscreteScheduler"
+  reset_torch_generators: True
   height: 512
   width: 512
   num_inference_steps: 4
@@ -25,10 +26,10 @@ variables:
   num_inference_steps:
     dtype: "int"
     min: 1
-    max: 2
+    max: 6
     step: 1
   guidance_scale:
     dtype: "int"
     min: 8
-    max: 9
+    max: 8
     step: 1
