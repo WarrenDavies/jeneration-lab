@@ -1,5 +1,6 @@
 import datetime
 import sys
+import json
 
 from pydantic import BaseModel
 
@@ -52,10 +53,13 @@ class Runner():
         run_context["timestamp"] = self.start_timestamp_str
         run_context["batch_generation_time"] = benchmarker.execution_time
         run_context["generation_time"] = benchmarker.execution_time / self.experiment.generator.batch_size
-        run_context["params"] = dict(self.ParamsSchema(**{
-            **self.experiment.generator.config,
-            **artifact_bundle
-        }))
+        run_context["params"] = json.dumps(
+            dict(self.ParamsSchema(**{
+                **self.experiment.generator.config,
+                **artifact_bundle
+            })),
+            sort_keys=True
+        )
         run_context["filename"] = filename
         run_context["output_path"] = str(self.storage_manager.output_folder)
 
