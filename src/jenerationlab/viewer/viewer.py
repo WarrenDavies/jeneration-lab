@@ -31,29 +31,22 @@ experiment_dropdown_options = list(experiment_location_map.keys())
 
 st.title("Jeneration Lab")
 st.write("Experiment Result Viewer.")
+
 selected_experiment = st.selectbox(
     "Select experiment",
     experiment_dropdown_options,
     index=0    
 )
 
-selected_experiment_id = (
-    experiment_location_map[selected_experiment]["experiment_id"]
-)
-selected_experiment_mask = df_all_experiments["experiment_id"] == selected_experiment_id
-df_selected_experiment = (
-    df_all_experiments[selected_experiment_mask]
+df_selected_experiment = utils.apply_experiment_filter(
+    df_all_experiments, 
+    selected_experiment,
+    experiment_location_map
 )
 
-dicts = df_selected_experiment['params'].apply(json.loads)
-df_params = pd.json_normalize(dicts)
 
-df_base = df_selected_experiment.drop(columns=['params']).reset_index(drop=True)
 
-df_selected_experiment = pd.concat(
-    [df_base, df_params], 
-    axis=1
-)
+
 
 st.sidebar.header("Filters")
 

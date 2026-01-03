@@ -41,6 +41,30 @@ def get_experiment_list(df):
     return experiment_selectors
 
 
+def apply_experiment_filter(
+    df_all_experiments,
+    selected_experiment,
+    experiment_location_map
+):
+    selected_experiment_id = (
+        experiment_location_map[selected_experiment]["experiment_id"]
+    )
+    selected_experiment_mask = (
+        df_all_experiments["experiment_id"] == selected_experiment_id
+    )
+    df_selected_experiment = (
+        df_all_experiments[selected_experiment_mask]
+    )
+    dicts = df_selected_experiment['params'].apply(json.loads)
+    df_params = pd.json_normalize(dicts)
+    df_base = df_selected_experiment.drop(columns=['params']).reset_index(drop=True)
+    df_selected_experiment = pd.concat(
+        [df_base, df_params], 
+        axis=1
+    )
+    return df_selected_experiment
+
+
 def get_artifact_params(df, filename):
     run_row_mask = df["filename"] == filename
     df_run_params = df.loc[run_row_mask, "params"]
