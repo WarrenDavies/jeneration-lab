@@ -49,7 +49,6 @@ class Runner():
     def build_run_context(self, benchmarker, artifact_bundle, filename):
 
         run_context = self.run_context.copy()
-
         run_context["timestamp"] = self.start_timestamp_str
         run_context["batch_generation_time"] = benchmarker.execution_time
         run_context["generation_time"] = benchmarker.execution_time / self.experiment.generator.batch_size
@@ -81,8 +80,10 @@ class Runner():
         """
         """
         for inference_config in self.experiment.inference_configs:
-            self.experiment.generator.config.update(inference_config)
+            if self.experiment.generator.config["reset_torch_generators"]:
+                self.experiment.generator.create_generators()
             
+            self.experiment.generator.config.update(inference_config)
             with Benchmarker() as benchmarker:
                 batch = self.experiment.generator.run_pipeline()
             
@@ -91,13 +92,11 @@ class Runner():
             batch_filenames = self.storage_manager.save(artifacts)
 
             for i, artifact_bundle in enumerate(batch):
-
                 run_context = self.build_run_context(
                     benchmarker, 
                     artifact_bundle,
                     batch_filenames[i]
                 )
-
                 generation_metadata_record = self.GenerationRecordClass(
                     schema=BaseSchema,
                     generation_metadata = run_context
