@@ -120,11 +120,6 @@ def apply_range_filter(df, col, range_):
 
 
 def get_artifact_params(df, filename):
-    # run_row_mask = df["filename"] == filename
-    # df_run_params = df.loc[run_row_mask, "params"]
-    # params = df_run_params.iloc[0]
-    # params = json.loads(params)
-
     params = df[df["filename"] == filename].to_dict(orient="records")
 
     return params[0]
@@ -146,6 +141,14 @@ def display_artifact_stats(params, stats):
     if lines:
         st.markdown("<br>".join(lines), unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
+
+
+def get_images(experiment_location_map, selected_experiment, selected_files):
+    image_dir = experiment_location_map[selected_experiment]["output_path"]
+    images = sorted(Path(image_dir).glob('*'))
+    images = [image for image in images if image.name in selected_files]
+
+    return images
 
 
 def render_image_grid(images, df, no_of_cols):
