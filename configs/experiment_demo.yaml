@@ -1,0 +1,35 @@
+experiment:
+  experiment_name: "Test"
+  experiment_description: "A test experiment"
+  generation_format: "image"
+
+generator:
+  model: "stable-diffusion-v1-5"
+  model_path: "runwayml/stable-diffusion-v1-5"
+  device: "cuda"
+  enable_attention_slicing: True
+  scheduler: "EulerDiscreteScheduler"
+  reset_torch_generators: True
+  height: 512
+  width: 512
+  num_inference_steps: 4
+  guidance_scale: 10
+  images_to_generate: 1
+  seeds: []
+  dtype: "bfloat16"
+  image_save_folder: "images/"
+  prompts: [
+      "A high-tech cyberpunk greenhouse inside a glass dome on Mars, lush bioluminescent alien plants glowing neon blue and purple, dusty red Martian landscape visible through the glass, cinematic lighting, hyper-detailed, 8k, synthwave aesthetic."
+  ]
+
+variables:
+  num_inference_steps:
+    dtype: "int"
+    min: 1
+    max: 6
+    step: 1
+  guidance_scale:
+    dtype: "int"
+    min: 8
+    max: 8
+    step: 1
