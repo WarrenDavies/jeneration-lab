@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
+from PIL import Image
+
 from jenerationlab.viewer import utils
 
 
@@ -32,6 +34,7 @@ experiment_dropdown_options = list(experiment_location_map.keys())
 #############################
 ##### Add site sections #####
 #############################
+st.set_page_config(layout="wide")
 st.title("Jeneration Lab")
 st.write("Experiment Result Viewer.")
 st.sidebar.header("Filters")
@@ -84,20 +87,59 @@ selected_files = df_selected_experiment["filename"].to_list()
 ############################
 #### Display Image Grid ####
 ############################
-images = utils.get_images(
-    experiment_location_map, 
-    selected_experiment,
-    selected_files
-)
+view_mode = st.radio("View Mode", ["Gallery", "Matrix"])
 
-if len(images) == 0:
-    st.write("No images found for this experiment.")
-    st.write("The experiment folder may have been deleted, or you may need to chill out on your filtering a bit.")
+if view_mode == "Matrix":
+    st.markdown("""
+        <style>
+            img {
+                border-radius: 0 !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    rows = sorted(df_selected_experiment["guidance_scale"].unique())
+    cols = sorted(df_selected_experiment["num_inference_steps"].unique())
 
-utils.render_image_grid(images, df_all_experiments, 3)
+    st.write(f"**Rows: Guidance Scale | Columns: Inference Steps**")
+    header_cols = st.columns([1] + [2 for _ in cols])
+    for i, col_val in enumerate(cols):
+        header_cols[i+1].write(f"**{col_val}**")
+
+    for row_val in rows:
+        row_cols = st.columns([1] + [2 for _ in cols])
+        row_cols[0].write(f"**{str(int(row_val))}**")
+        
+        for i, col_val in enumerate(cols):
+            match = df_selected_experiment[
+                (df_selected_experiment["guidance_scale"] == row_val) & 
+                (df_selected_experiment["num_inference_steps"] == col_val)
+            ]
+            
+            with row_cols[i+1]:
+                if not match.empty:
+                    img_path = match.iloc[0]["output_path"] + "/" + match.iloc[0]["filename"] 
+                    img = Image.open(img_path)
+                    st.image(img)
+                else:
+                    st.write("-")
+
+if view_mode == "Gallery":
+    no_of_cols = st.slider("Number of columns", 0, 10, 3)
+    images = utils.get_images(
+        experiment_location_map, 
+        selected_experiment,
+        selected_files
+    )
+
+    if len(images) == 0:
+        st.write("No images found for this experiment.")
+        st.write("The experiment folder may have been deleted, or you may need to chill out on your filtering a bit.")
+
+    utils.render_image_grid(images, df_all_experiments, no_of_cols)
 
 
 ############################
 ##### Display Raw Data #####
 ############################
+st.write("Raw Data")
 st.dataframe(df_selected_experiment)
