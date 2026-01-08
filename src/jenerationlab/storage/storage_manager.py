@@ -11,11 +11,13 @@ class StorageManager():
     """
 
     def __init__(self, core_config, experiment_config):
+        self.core_config = core_config
         self.data_connection = data_connections_registry.get_object(core_config)
         self.artifacts = []
         self.save_timestamp = ""
         self.filenames = []
-        
+        self.data_connections = {}
+
 
     def setup_experiment_folders(self, experiment_folder_name):
         self.experiment_folder_name = experiment_folder_name
@@ -26,7 +28,14 @@ class StorageManager():
         self.output_folder = Path(self.experiment_folder) / Path("artifacts")
         self.output_folder.mkdir(parents=True, exist_ok=True)
 
-    
+
+    def create_data_connection(self, connection_config):
+        connection_name = connection_config["name"]
+        self.data_connections[connection_name] = (
+            data_connections_registry.get_object(connection_config["data_source"])
+        )
+
+
     def save(self, artifacts = None):
         """
         Saves generated artifacts to the configured directory.
@@ -48,6 +57,14 @@ class StorageManager():
             artifact.save(save_path)
 
         return batch_filenames
+
+
+    def get_create_connection(self, connection_name):
+        """
+        """
+        self.measurements_conn = data_connections_registry.get_object(
+            self.core_config[""]
+        )
 
     
     def create_data_store(self, headers):

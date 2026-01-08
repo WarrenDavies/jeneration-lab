@@ -1,0 +1,6 @@
+data_connection:
+  name: "measurements"
+  data_source:
+    output_data_type: "csv"
+    data_source_location: "./data/measurements.csv"
+  
