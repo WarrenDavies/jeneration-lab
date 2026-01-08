@@ -21,10 +21,14 @@ runner.run()
 
 storage_manager.create_data_connection(rater_config["data_connection"])
 
-
 experiment_id = "b932bdef"
 rating_manager = Rater(rater_config, storage_manager)
+
 queue = rating_manager.get_queue(experiment_id)
 print(queue)
+
+data_row = [experiment_id, "test"]
+rating_manager.storage_manager.data_connections["measurements"].append_data(data_row)
+
 
 
