@@ -17,6 +17,7 @@ class StorageManager():
         self.save_timestamp = ""
         self.filenames = []
         self.data_connections = {}
+        self.create_connections()
 
 
     def setup_experiment_folders(self, experiment_folder_name):
@@ -34,6 +35,16 @@ class StorageManager():
         self.data_connections[connection_name] = (
             data_connections_registry.get_object(connection_config["data_source"])
         )
+
+
+    def create_connections(self):
+        for connection in self.core_config["data_connections"]:
+            self.data_connections[connection] = (
+                data_connections_registry.get_object(
+                    self.core_config["data_connections"][connection]
+                )
+            )
+        print(self.data_connections)
 
 
     def save(self, artifacts = None):
