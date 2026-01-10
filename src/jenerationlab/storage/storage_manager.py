@@ -2,6 +2,7 @@ from pathlib import Path
 import datetime
 import os
 import sys
+import yaml
 
 from jenerationutils.data_connections import registry as data_connections_registry
 
@@ -20,16 +21,6 @@ class StorageManager():
         self.create_connections()
 
 
-    def setup_experiment_folders(self, experiment_folder_name):
-        self.experiment_folder_name = experiment_folder_name
-
-        self.experiment_folder = Path("outputs/") / Path(experiment_folder_name)
-        self.experiment_folder.mkdir(parents=True, exist_ok=True)
-
-        self.output_folder = Path(self.experiment_folder) / Path("artifacts")
-        self.output_folder.mkdir(parents=True, exist_ok=True)
-
-
     def create_data_connection(self, connection_config):
         connection_name = connection_config["name"]
         self.data_connections[connection_name] = (
@@ -46,7 +37,7 @@ class StorageManager():
             )
 
 
-    def save(self, artifacts = None):
+    def save(self, output_folder, artifacts = None):
         """
         Saves generated artifacts to the configured directory.
 
@@ -63,7 +54,7 @@ class StorageManager():
             batch_filenames.append(file_name)
             self.filenames.append(file_name)
             print("saving ", file_name)
-            save_path = os.path.join(self.output_folder, file_name)
+            save_path = os.path.join(output_folder, file_name)
             artifact.save(save_path)
 
         return batch_filenames
@@ -78,4 +69,9 @@ class StorageManager():
 
     
     def create_data_store(self, headers):
-        data_connection.create_new_data_source(headers)
+        self.data_connection.create_new_data_source(headers)
+
+    
+    def dump_config(self, config, path):
+        
+        yaml.safe_dump(config, open(path, "w"))
