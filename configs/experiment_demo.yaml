@@ -25,11 +25,14 @@ generator:
 variables:
   num_inference_steps:
     dtype: "int"
-    min: 1
-    max: 1
+    min: 5
+    max: 15
     step: 1
   guidance_scale:
     dtype: "int"
-    min: 1
-    max: 1
+    min: 7
+    max: 7
     step: 1
+
+ratings:
+  rating: int

@@ -44,7 +44,6 @@ class StorageManager():
                     self.core_config["data_connections"][connection]
                 )
             )
-        print(self.data_connections)
 
 
     def save(self, artifacts = None):
