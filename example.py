@@ -11,24 +11,21 @@ with open("configs/experiment_demo.yaml", 'r') as stream:
 with open("configs/core_config.yaml", 'r') as stream:
     core_config = yaml.safe_load(stream)
 
-with open("configs/rater_config.yaml", 'r') as stream:
-    rater_config = yaml.safe_load(stream)
-
 experiment = Experiment(experiment_config)
 storage_manager = StorageManager(core_config, experiment_config)
 runner = Runner(core_config, experiment_config, experiment, storage_manager)
 runner.run()
 
-storage_manager.create_data_connection(rater_config["data_connection"])
+with open(str(runner.experiment_config_path), 'r') as stream:
+    rater_config = yaml.safe_load(stream)
+rating_manager = Rater(core_config, rater_config, storage_manager)
 
-experiment_id = "b932bdef"
-rating_manager = Rater(rater_config, storage_manager)
+queue = rating_manager.get_queue("rating")
 
-queue = rating_manager.get_queue(experiment_id)
-print(queue)
+# here is where you would loop through the tasks, but we'll just do one for the demo
+rating = True
+artifact_id = queue[0]
 
-data_row = [experiment_id, "test"]
-rating_manager.storage_manager.data_connections["measurements"].append_data(data_row)
-
+rating_manager.rate_artifact(artifact_id, "rating", rating)
 
 
