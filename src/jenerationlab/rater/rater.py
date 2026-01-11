@@ -5,6 +5,11 @@ from jenerationutils.jenerationrecord import registry as recorder_registry
 
 from jenerationlab.schemas.measurements import MeasurementSchema
 
+
+class InvalidRatingError(Exception):
+    pass
+
+
 class Rater():
     """
     """
@@ -108,7 +113,18 @@ class Rater():
         )
 
 
+    def is_valid_rating(self, rating_name):
+        return rating_name in self.config["ratings"].keys()
+
     def rate_artifact(self, artifact_id, rating_name, rating):
+        if not self.is_valid_rating(rating_name):
+            valid_ratings = list(self.config["ratings"].keys())
+            raise InvalidRatingError(
+                f"Invalid rating '{rating_name}' for experiment "
+                f"{self.config["experiment"]['experiment_id']}. "
+                f"Valid ratings are: {valid_ratings}"
+            )
+
         measurement_record = self.build_measurement_record(
             artifact_id, 
             rating_name,
