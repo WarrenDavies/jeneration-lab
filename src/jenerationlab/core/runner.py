@@ -124,6 +124,9 @@ class Runner():
 
     def save_config(self):
         config = copy.deepcopy(self.experiment.config)
-        config["experiment_id"] = self.experiment.experiment_id
-        path = Path(self.experiment_folder / "experiment.yaml")
-        self.storage_manager.dump_config(config, path)
+        config["experiment"]["experiment_id"] = self.experiment.experiment_id
+        config["experiment"]["artifact_folder"] = str(self.output_folder)
+        config["experiment"]["experiment_folder"] = str(self.experiment_folder)
+
+        self.experiment_config_path = Path(self.experiment_folder / "experiment.yaml")
+        self.storage_manager.dump_config(config, self.experiment_config_path)

@@ -14,7 +14,7 @@ class Rater():
         self.df_all_measurements = self.import_data_to_df("measurements")
         self.df_artifacts = self.import_data_to_df("experiments")
         self.GenerationRecordClass = recorder_registry.get_class(
-            rater_config["data_connection"]["data_source"]["output_data_type"]
+            core_config["data_connections"]["measurements"]["output_data_type"]
         )
 
 
@@ -42,12 +42,11 @@ class Rater():
         """
         df_artifacts = self.filter_to_experiment(
             self.df_artifacts,
-            self.config["experiment_id"]
+            self.config["experiment"]["experiment_id"]
         )
-
         df_measurements = self.filter_to_experiment(
             self.df_all_measurements,
-            self.config["experiment_id"]
+            self.config["experiment"]["experiment_id"]
         )
         df_artifacts_with_rating = self.filter_to_rows_with_measurement(
             df_measurements,
@@ -92,7 +91,7 @@ class Rater():
         measurement_record = {
             "measurement_id": uuid.uuid4().hex[:8],
             "artifact_id": artifact_id,
-            "experiment_id": self.config["experiment_id"],
+            "experiment_id": self.config["experiment"]["experiment_id"],
             "timestamp": datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
             "producer": "human",
             "measurement_name": rating_name,

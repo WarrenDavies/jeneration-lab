@@ -73,5 +73,4 @@ class StorageManager():
 
     
     def dump_config(self, config, path):
-        
         yaml.safe_dump(config, open(path, "w"))
