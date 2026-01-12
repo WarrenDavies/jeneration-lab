@@ -13,8 +13,8 @@ class InvalidRatingError(Exception):
 class Rater():
     """
     """
-    def __init__(self, core_config, rater_config, storage_manager):
-        self.config = rater_config
+    def __init__(self, core_config, experiment_config, storage_manager):
+        self.config = experiment_config
         self.storage_manager = storage_manager
         self.df_all_measurements = self.import_data_to_df("measurements")
         self.df_artifacts = self.import_data_to_df("experiments")
@@ -115,6 +115,11 @@ class Rater():
 
     def is_valid_rating(self, rating_name):
         return rating_name in self.config["ratings"].keys()
+
+
+    def get_question(self, rating_name):
+        return self.config["ratings"][rating_name]["question"]
+
 
     def rate_artifact(self, artifact_id, rating_name, rating):
         if not self.is_valid_rating(rating_name):

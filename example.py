@@ -17,15 +17,16 @@ runner = Runner(core_config, experiment_config, experiment, storage_manager)
 runner.run()
 
 with open(str(runner.experiment_config_path), 'r') as stream:
-    rater_config = yaml.safe_load(stream)
-rating_manager = Rater(core_config, rater_config, storage_manager)
+    experiment_config = yaml.safe_load(stream)
+rating_manager = Rater(core_config, experiment_config, storage_manager)
 
-queue = rating_manager.get_queue("rating")
+requested_ratings = experiment_config["ratings"].keys()
 
-# here is where you would loop through the tasks, but we'll just do one for the demo
-rating = True
-artifact_id = queue[0]
-
-rating_manager.rate_artifact(artifact_id, "rating", rating)
-
-
+for rating_name in requested_ratings:
+    queue = rating_manager.get_queue(rating_name)
+    for artifact_id in queue:
+        question = rating_manager.get_question(rating_name)
+        print(artifact_id)
+        print(question)
+        rating_value = input("> ")
+        rating_manager.rate_artifact(artifact_id, "rating", rating_value)
