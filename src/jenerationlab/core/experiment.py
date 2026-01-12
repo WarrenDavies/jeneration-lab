@@ -3,12 +3,12 @@ import sys
 from pathlib import Path
 from itertools import product
 import uuid
+import copy
 
 from jenerationutils.benchmarker.benchmarker import Benchmarker
 
 from jenerationlab.variables import registry as variable_registry
 from jenerationlab.core.generators import generator_registries
-from jenerationlab.storage.storage_manager import StorageManager
 
 class Experiment():
     """
