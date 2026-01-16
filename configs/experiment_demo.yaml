@@ -35,4 +35,9 @@ variables:
     step: 1
 
 ratings:
-  rating: int
+  composition: 
+    type: "int"
+    question: "How much do you like this image on a scale of 1-10?"
+  prompt_adherence:
+    type: "int"
+    question: "How well does this image match the prompt on a scale of 1-10?"

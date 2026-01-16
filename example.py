@@ -29,4 +29,4 @@ for rating_name in requested_ratings:
         print(artifact_id)
         print(question)
         rating_value = input("> ")
-        rating_manager.rate_artifact(artifact_id, "rating", rating_value)
+        rating_manager.rate_artifact(artifact_id, rating_name, rating_value)
