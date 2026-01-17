@@ -100,7 +100,18 @@ class Runner():
             if self.experiment.generator.config["reset_torch_generators"]:
                 self.experiment.generator.create_generators()
             
-            self.experiment.generator.config.update(inference_config)
+            param_changes = [
+                key 
+                for key in inference_config 
+                if key in self.experiment.generator.config 
+                and inference_config[key] != self.experiment.generator.config[key]
+            ]
+            if any(param not in self.experiment.generator.get_runtime_params() for param in param_changes):
+                print("model change param dectected, tearing down model")
+                self.experiment.rebuild_generator(inference_config)
+            else:
+                self.experiment.generator.config.update(inference_config)
+
             with Benchmarker() as benchmarker:
                 batch = self.experiment.generator.run_pipeline()
             
