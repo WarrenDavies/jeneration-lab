@@ -1,0 +1,52 @@
+experiment:
+  experiment_name: "Multi Model Experiement"
+  experiment_description: "An example config for how you would run an experiment using two different models"
+  generation_format: "image"
+
+generator:
+  model: "stable-diffusion-v1-5"
+  model_path: "runwayml/stable-diffusion-v1-5"
+  device: "cuda"
+  enable_attention_slicing: True
+  scheduler: "EulerDiscreteScheduler"
+  reset_torch_generators: True
+  height: 512
+  width: 512
+  num_inference_steps: 4
+  guidance_scale: 10
+  images_to_generate: 1
+  seeds: []
+  dtype: "bfloat16"
+  image_save_folder: "images/"
+  prompts: [
+      "An engineer standing in a candle-lit lab at night, surrounded by floating diagrams, glowing code, tangled wires, and half-assembled machines, as two powerful AI models materialize behind them, cinematic lighting, ultra detailed."
+  ]
+
+variables:
+  # models must go in a variable with a "multi" dtype. A multi variable enables you to define two different string variables, and ensure that these two variables are 
+  # always paired together when the experiment grid is created.
+  models:
+    dtype: "multi"
+    options:
+      - model: "stable-diffusion-v1-5"
+        model_path: "runwayml/stable-diffusion-v1-5"
+      - model: "sdxl"
+        model_path: "/home/w/models/stabilityai/stable-diffusion-xl-base-1.0"
+  num_inference_steps:
+    dtype: "int"
+    min: 10
+    max: 15
+    step: 1
+  guidance_scale:
+    dtype: "int"
+    min: 5
+    max: 9
+    step: 1
+
+ratings:
+  composition: 
+    type: "int"
+    question: "How much do you like this image on a scale of 1-10?"
+  prompt_adherence:
+    type: "int"
+    question: "How well does this image match the prompt on a scale of 1-10?"

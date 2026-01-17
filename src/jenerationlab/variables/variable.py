@@ -8,8 +8,6 @@ class Variable(ABC):
         """
         """
         self.dtype = config["dtype"]
-        self.min = config["min"]
-        self.max = config["max"]
 
     def values(self):
         """
