@@ -16,6 +16,7 @@ textjenerator = "*"
 pydantic = "^2.12.5"
 imagejenerator = {path = "../image-jenerator", develop = true}
 jenerationutils = {path = "../jeneration-utils", develop = true}
+basejenerator = {path = "../base-jenerator", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
