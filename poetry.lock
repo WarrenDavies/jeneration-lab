@@ -102,6 +102,20 @@ files = [
 ]
 
 [[package]]
+name = "basejenerator"
+version = "0.1.0"
+description = "Abstract base class and return formats for AI Generator classes within the Jeneratorverse."
+optional = false
+python-versions = ">=3.10,<3.15"
+groups = ["main"]
+files = []
+develop = true
+
+[package.source]
+type = "directory"
+url = "../base-jenerator"
+
+[[package]]
 name = "black"
 version = "24.10.0"
 description = "The uncompromising code formatter."
@@ -2411,16 +2425,19 @@ name = "textjenerator"
 version = "1.0.1"
 description = "AI text generator"
 optional = false
-python-versions = "<3.15,>=3.10"
+python-versions = ">=3.10,<3.15"
 groups = ["main"]
-files = [
-    {file = "textjenerator-1.0.1-py3-none-any.whl", hash = "sha256:5af817a41a290efe4b8515b0d3e5b755b48fe69eee1b321c921a73b6e7fa4ecb"},
-    {file = "textjenerator-1.0.1.tar.gz", hash = "sha256:15f4b1510aeae74829790b40f98c0f0306cf878c1eb9df055512f75edc2d07d6"},
-]
+files = []
+develop = true
 
 [package.dependencies]
+basejenerator = {path = "../base-jenerator", develop = true}
 llama-cpp-python = ">=0.3.16,<0.4.0"
-torch = ">=2.9.1,<3.0.0"
+torch = "^2.9.1"
+
+[package.source]
+type = "directory"
+url = "../text-jenerator"
 
 [[package]]
 name = "tokenizers"
@@ -2808,4 +2825,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.15"
-content-hash = "a3bb4526c97ec4577c3d7e0b8598be96425598a19c9d0d55151e5db432ae985b"
+content-hash = "2ba0078e0b971744eb765df98eae97c456a559caf1f47933ac32a104c92d0a40"

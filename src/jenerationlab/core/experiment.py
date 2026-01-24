@@ -22,12 +22,12 @@ class Experiment():
         self.generator = self.get_generator()
         self.variables = self.define_variables()
         self.inference_configs = self.get_inference_configs()
-        self.generator.create_pipeline()
+        self.generator.load()
+        self.generator.prepare()
 
 
     def process_generator_config(self):
         generator_config = self.config["generator"]
-        generator_config["image_save_folder"] = self.config["generator"]["image_save_folder"]
         
         return generator_config
 
@@ -44,7 +44,7 @@ class Experiment():
 
     def rebuild_generator(self, generator_config):
         
-        self.generator.teardown_pipeline()
+        self.generator.teardown()
         self.generator = None
 
         new_generator_config = self.generator_config.copy()
@@ -53,7 +53,8 @@ class Experiment():
         self.generator = self.get_generator(
             new_generator_config
         )
-        self.generator.create_pipeline()
+        self.generator.load()
+        self.generator.prepare()
 
         
     def define_variables(self):

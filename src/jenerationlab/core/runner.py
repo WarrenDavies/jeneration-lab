@@ -97,8 +97,8 @@ class Runner():
         """
         """
         for inference_config in self.experiment.inference_configs:
-            if self.experiment.generator.config["reset_torch_generators"]:
-                self.experiment.generator.create_generators()
+            if self.experiment_config["experiment"]["reset_model_each_run"]:
+                self.experiment.generator.prepare()
             
             param_changes = [
                 key 
@@ -111,18 +111,18 @@ class Runner():
                 self.experiment.rebuild_generator(inference_config)
             else:
                 self.experiment.generator.config.update(inference_config)
-
+            print(self.experiment.generator)
             with Benchmarker() as benchmarker:
-                batch = self.experiment.generator.run_pipeline()
-            
-            artifacts = [item["artifact"] for item in batch]
+                output = self.experiment.generator.generate()
+            print(output)
+            artifacts = [artifact for artifact in output.batch]
             self.storage_manager.artifacts.extend(artifacts)
             batch_filenames = self.storage_manager.save(self.output_folder, artifacts)
 
-            for i, artifact_bundle in enumerate(batch):
+            for i, artifact in enumerate(artifacts):
                 run_context = self.build_run_context(
                     benchmarker, 
-                    artifact_bundle,
+                    artifact.item_extras,
                     batch_filenames[i]
                 )
                 generation_metadata_record = self.GenerationRecordClass(
