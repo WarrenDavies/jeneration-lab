@@ -17,7 +17,7 @@ class Rater():
         self.config = experiment_config
         self.storage_manager = storage_manager
         self.df_all_measurements = self.import_data_to_df("measurements")
-        self.df_artifacts = self.import_data_to_df("experiments")
+        self.df_artifacts = self.import_data_to_df("artifacts")
         self.GenerationRecordClass = recorder_registry.get_class(
             core_config["data_connections"]["measurements"]["output_data_type"]
         )
@@ -58,15 +58,15 @@ class Rater():
             rating_name,
         )
 
-        all_artifacts = df_artifacts["filename"].tolist()
+        all_artifacts = df_artifacts["artifact_id"].tolist()
         artifacts_with_ratings = df_artifacts_with_rating["artifact_id"].tolist()
         tasks = list(set(all_artifacts) - set(artifacts_with_ratings))
         tasks.sort()
-
+        print(tasks)
         return tasks
 
-
-    def get_rating_type_key(self, rating):
+    @staticmethod
+    def get_rating_type_key(rating):
         TYPE_MAP = {
             int: "value_int",
             float: "value_float",
