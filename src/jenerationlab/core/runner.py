@@ -146,6 +146,16 @@ class Runner():
             self.save_metadata(dataset_name, measurement_record)
 
 
+    def get_param_changes(self, inference_config):
+        param_changes = [
+            key 
+            for key in inference_config 
+            if key in self.experiment.generator.config 
+            and inference_config[key] != self.experiment.generator.config[key]
+        ]
+        return param_changes
+
+
     def run(self):
         """
         """
@@ -153,12 +163,8 @@ class Runner():
             if self.experiment_config["experiment"]["reset_model_each_run"]:
                 self.experiment.generator.prepare()
             
-            param_changes = [
-                key 
-                for key in inference_config 
-                if key in self.experiment.generator.config 
-                and inference_config[key] != self.experiment.generator.config[key]
-            ]
+            param_changes = self.get_param_changes(inference_config)
+
             if any(param not in self.experiment.generator.get_runtime_params() for param in param_changes):
                 print("model change param dectected, tearing down model")
                 self.experiment.rebuild_generator(inference_config)
