@@ -156,6 +156,14 @@ class Runner():
         return param_changes
 
 
+    def reload_generator_if_needed(self, inference_config, param_changes):
+        if any(param not in self.experiment.generator.get_runtime_params() for param in param_changes):
+            print("model change param dectected, tearing down model")
+            self.experiment.rebuild_generator(inference_config)
+        else:
+            self.experiment.generator.config.update(inference_config)
+
+
     def run(self):
         """
         """
@@ -164,12 +172,8 @@ class Runner():
                 self.experiment.generator.prepare()
             
             param_changes = self.get_param_changes(inference_config)
+            self.reload_generator_if_needed(inference_config, param_changes)
 
-            if any(param not in self.experiment.generator.get_runtime_params() for param in param_changes):
-                print("model change param dectected, tearing down model")
-                self.experiment.rebuild_generator(inference_config)
-            else:
-                self.experiment.generator.config.update(inference_config)
             with Benchmarker() as benchmarker:
                 output = self.experiment.generator.generate()
             artifacts = [artifact for artifact in output.batch]
