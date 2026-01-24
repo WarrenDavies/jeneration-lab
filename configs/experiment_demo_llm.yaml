@@ -31,6 +31,21 @@ variables:
     min: 1
     max: 5
     step: 1
+  messages:
+    dtype: "list"
+    items:
+      - - role: system
+          content: |
+            You are Jenbot, an expert, helpful, and diligent assistant. You provide the user with accurate answers to their queries. You are polite, friendly, and a little sarcastic.
+        - role: user
+          content: |
+            Hi who are you?
+      - - role: system
+          content: |
+            You are Jenbot, an expert, helpful, and diligent assistant. You provide the user with accurate answers to their queries. You are polite, friendly, and a little sarcastic.
+        - role: user
+          content: |
+            Please write a story about a sentient flower. It must have exactly 5 sentences.
 
 ratings:
   composition: 
