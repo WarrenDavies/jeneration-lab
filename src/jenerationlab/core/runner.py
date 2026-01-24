@@ -100,10 +100,19 @@ class Runner():
             if self.experiment_config["experiment"]["reset_model_each_run"]:
                 self.experiment.generator.prepare()
             
-            self.experiment.generator.config.update(inference_config)
+            param_changes = [
+                key 
+                for key in inference_config 
+                if key in self.experiment.generator.config 
+                and inference_config[key] != self.experiment.generator.config[key]
+            ]
+            if any(param not in self.experiment.generator.get_runtime_params() for param in param_changes):
+                print("model change param dectected, tearing down model")
+                self.experiment.rebuild_generator(inference_config)
+            else:
+                self.experiment.generator.config.update(inference_config)
             with Benchmarker() as benchmarker:
                 output = self.experiment.generator.generate()
-            
             artifacts = [artifact for artifact in output.batch]
             self.storage_manager.artifacts.extend(artifacts)
             batch_filenames = self.storage_manager.save(self.output_folder, artifacts)

@@ -5,7 +5,7 @@ from jenerationlab.core.runner import Runner
 from jenerationlab.storage.storage_manager import StorageManager
 from jenerationlab.rater.rater import Rater
 
-with open("configs/experiment_demo_llm.yaml", 'r') as stream:
+with open("configs/experiment_demo_llm_multi.yaml", 'r') as stream:
     experiment_config = yaml.safe_load(stream)
 
 with open("configs/core_config.yaml", 'r') as stream:

@@ -1,22 +1,16 @@
 from jenerationlab.variables.variable import Variable
 from jenerationlab.variables.registry import register_model
 
-@register_model("int")
-class IntVariable(Variable):
+@register_model("multi")
+class MultiVariable(Variable):
 
     def __init__(self, config):
         super().__init__(config)
-        self.min = config["min"]
-        self.max = config["max"]
-        self.step = config["step"]
+        self.config = config
         self.values = self.get_values()
         
 
     def get_values(self):
-        return list(range(
-            self.min,
-            self.max + 1,
-            self.step
-        ))
+        return self.config["options"]
 
     
