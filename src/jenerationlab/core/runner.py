@@ -111,10 +111,8 @@ class Runner():
                 self.experiment.rebuild_generator(inference_config)
             else:
                 self.experiment.generator.config.update(inference_config)
-            print(self.experiment.generator)
             with Benchmarker() as benchmarker:
                 output = self.experiment.generator.generate()
-            print(output)
             artifacts = [artifact for artifact in output.batch]
             self.storage_manager.artifacts.extend(artifacts)
             batch_filenames = self.storage_manager.save(self.output_folder, artifacts)
