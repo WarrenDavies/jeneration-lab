@@ -65,7 +65,6 @@ class Runner():
 
 
     def build_run_context(self, benchmarker, artifact_bundle, filename):
-
         run_context = self.run_context.copy()
         run_context["artifact_id"] = uuid.uuid4().hex[:8]
         run_context["timestamp"] = self.start_timestamp_str
@@ -99,7 +98,6 @@ class Runner():
 
 
     def build_measurement_record(self, artifact_id, metric_name, metric):
-
         rating_type_key = Rater.get_rating_type_key(metric)
 
         values = {
@@ -134,7 +132,6 @@ class Runner():
 
 
     def save_generation_timing(self, dataset_name, run_context):
-        
         for measurement_name in ["generation_time", "batch_generation_time"]:
 
             measurement_record = self.build_measurement_record(
@@ -183,8 +180,8 @@ class Runner():
 
             with Benchmarker() as benchmarker:
                 output = self.experiment.generator.generate()
-            artifacts = [artifact for artifact in output.batch]
 
+            artifacts = [artifact for artifact in output.batch]
             batch_filenames = self.save_output_to_disk(artifacts)
 
             for i, artifact in enumerate(artifacts):
@@ -196,8 +193,6 @@ class Runner():
                 self.save_metadata("artifacts", run_context)
                 self.save_generation_timing("measurements", run_context)
             self.save_metadata("experiments", run_context)
-            
-
             
 
     def save_config(self):
