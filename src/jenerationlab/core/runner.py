@@ -164,6 +164,13 @@ class Runner():
             self.experiment.generator.config.update(inference_config)
 
 
+    def save_output_to_disk(self, artifacts):
+        self.storage_manager.artifacts.extend(artifacts)
+        batch_filenames = self.storage_manager.save(self.output_folder, artifacts)
+
+        return batch_filenames
+
+
     def run(self):
         """
         """
@@ -177,8 +184,8 @@ class Runner():
             with Benchmarker() as benchmarker:
                 output = self.experiment.generator.generate()
             artifacts = [artifact for artifact in output.batch]
-            self.storage_manager.artifacts.extend(artifacts)
-            batch_filenames = self.storage_manager.save(self.output_folder, artifacts)
+
+            batch_filenames = self.save_output_to_disk(artifacts)
 
             for i, artifact in enumerate(artifacts):
                 run_context = self.build_run_context(
