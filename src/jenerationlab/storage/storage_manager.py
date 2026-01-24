@@ -50,7 +50,7 @@ class StorageManager():
         batch_filenames = []
         for i, artifact in enumerate(artifacts):
             generation_no = str((len(self.filenames) + 1)).zfill(4)
-            file_name = f"{generation_no}_{save_timestamp}_no{i + 1}.jpg"
+            file_name = f"{generation_no}_{save_timestamp}_no{i + 1}"
             batch_filenames.append(file_name)
             self.filenames.append(file_name)
             print("saving ", file_name)
