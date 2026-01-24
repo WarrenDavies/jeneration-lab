@@ -1,7 +1,8 @@
 experiment:
-  experiment_name: "Test"
-  experiment_description: "A test experiment"
+  experiment_name: "Inference Steps vs Guidance Scale"
+  experiment_description: "A test to visualise the impact of inference steps and guidance scale on diffusers outputs."
   generation_format: "image"
+  reset_model_each_run: True
 
 generator:
   model: "stable-diffusion-v1-5"
@@ -9,7 +10,6 @@ generator:
   device: "cuda"
   enable_attention_slicing: True
   scheduler: "EulerDiscreteScheduler"
-  reset_torch_generators: True
   height: 512
   width: 512
   num_inference_steps: 4
@@ -25,11 +25,19 @@ generator:
 variables:
   num_inference_steps:
     dtype: "int"
-    min: 1
-    max: 6
+    min: 15
+    max: 20
     step: 1
   guidance_scale:
     dtype: "int"
-    min: 8
-    max: 8
+    min: 1
+    max: 15
     step: 1
+
+ratings:
+  composition: 
+    type: "int"
+    question: "How much do you like this image on a scale of 1-10?"
+  prompt_adherence:
+    type: "int"
+    question: "How well does this image match the prompt on a scale of 1-10?"

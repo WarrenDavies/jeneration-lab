@@ -3,12 +3,12 @@ import sys
 from pathlib import Path
 from itertools import product
 import uuid
+import copy
 
 from jenerationutils.benchmarker.benchmarker import Benchmarker
 
 from jenerationlab.variables import registry as variable_registry
 from jenerationlab.core.generators import generator_registries
-from jenerationlab.storage.storage_manager import StorageManager
 
 class Experiment():
     """
@@ -22,22 +22,39 @@ class Experiment():
         self.generator = self.get_generator()
         self.variables = self.define_variables()
         self.inference_configs = self.get_inference_configs()
-        self.generator.create_pipeline()
+        self.generator.load()
+        self.generator.prepare()
 
 
     def process_generator_config(self):
         generator_config = self.config["generator"]
-        generator_config["image_save_folder"] = self.config["generator"]["image_save_folder"]
         
         return generator_config
 
 
-    def get_generator(self):
+    def get_generator(self, generator_config = None):
+        if not generator_config:
+            generator_config = self.generator_config
         generation_format = self.config["experiment"]["generation_format"]
         generator_registry = generator_registries[generation_format]
-        generator = generator_registry.get_model_class(self.generator_config)
+        generator = generator_registry.get_model_class(generator_config)
         
         return generator
+
+
+    def rebuild_generator(self, generator_config):
+        
+        self.generator.teardown()
+        self.generator = None
+
+        new_generator_config = self.generator_config.copy()
+        new_generator_config.update(generator_config)
+
+        self.generator = self.get_generator(
+            new_generator_config
+        )
+        self.generator.load()
+        self.generator.prepare()
 
         
     def define_variables(self):
@@ -50,6 +67,16 @@ class Experiment():
         return variables
 
 
+    def unnest_multi_configs(self, config):
+        unnested_config = {}
+        for key, value in config.items():
+            if isinstance(value, dict):
+                unnested_config.update(value)
+            else:
+                unnested_config[key] = value
+        return unnested_config
+
+
     def get_inference_configs(self):
         inference_configs = []
         inference_param_combos = product(*[variable.values for variable in self.variables])
@@ -58,7 +85,12 @@ class Experiment():
                 variable.name: value 
                 for variable, value in zip(self.variables, inference_param_combo)
             })
-        return inference_configs
+        unnested_inference_configs = []
+        for config in inference_configs:
+            config_unnested = self.unnest_multi_configs(config)
+            unnested_inference_configs.append(config_unnested)
+
+        return unnested_inference_configs
 
 
     def run(self):
@@ -67,6 +99,6 @@ class Experiment():
             self.generator.config.update(inference_config)
             with Benchmarker() as benchmarker:
                 self.generator.run_pipeline()
-            print(benchmarker.execution_time)
+            print("generation time:", benchmarker.execution_time)
             self.generator.save_image()
         

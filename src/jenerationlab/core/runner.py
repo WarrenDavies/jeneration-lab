@@ -1,8 +1,10 @@
 import datetime
 import sys
 import json
+import copy
 
 from pydantic import BaseModel
+from pathlib import Path
 
 from jenerationutils.benchmarker.benchmarker import Benchmarker
 from jenerationutils.jenerationrecord import registry as recorder_registry
@@ -20,7 +22,7 @@ class Runner():
         self.experiment_config = experiment_config
         self.experiment = experiment
         self.storage_manager = storage_manager
-        self.storage_manager.setup_experiment_folders(self.start_timestamp_str)
+        self.setup_experiment_folders(self.start_timestamp_str)
         self.GenerationRecordClass = recorder_registry.get_class(core_config["output_data_type"])
         self.run_context = {
             "experiment_id": self.experiment.experiment_id,
@@ -28,8 +30,19 @@ class Runner():
             **experiment_config["generator"]
         }
         self.ParamsSchema = self.get_params_schema()
+        self.save_config()
 
-    
+
+    def setup_experiment_folders(self, experiment_folder_name):
+        self.experiment_folder_name = experiment_folder_name
+
+        self.experiment_folder = Path("outputs/") / Path(experiment_folder_name)
+        self.experiment_folder.mkdir(parents=True, exist_ok=True)
+
+        self.output_folder = Path(self.experiment_folder) / Path("artifacts")
+        self.output_folder.mkdir(parents=True, exist_ok=True)
+
+
     def get_params_schema(self):
         # This lives here temporarily, need to update and republish the generator
         # to emit the params class it expects.
@@ -61,7 +74,7 @@ class Runner():
             sort_keys=True
         )
         run_context["filename"] = filename
-        run_context["output_path"] = str(self.storage_manager.output_folder)
+        run_context["output_path"] = str(self.output_folder)
 
         return run_context
 
@@ -84,21 +97,30 @@ class Runner():
         """
         """
         for inference_config in self.experiment.inference_configs:
-            if self.experiment.generator.config["reset_torch_generators"]:
-                self.experiment.generator.create_generators()
+            if self.experiment_config["experiment"]["reset_model_each_run"]:
+                self.experiment.generator.prepare()
             
-            self.experiment.generator.config.update(inference_config)
+            param_changes = [
+                key 
+                for key in inference_config 
+                if key in self.experiment.generator.config 
+                and inference_config[key] != self.experiment.generator.config[key]
+            ]
+            if any(param not in self.experiment.generator.get_runtime_params() for param in param_changes):
+                print("model change param dectected, tearing down model")
+                self.experiment.rebuild_generator(inference_config)
+            else:
+                self.experiment.generator.config.update(inference_config)
             with Benchmarker() as benchmarker:
-                batch = self.experiment.generator.run_pipeline()
-            
-            artifacts = [item["artifact"] for item in batch]
+                output = self.experiment.generator.generate()
+            artifacts = [artifact for artifact in output.batch]
             self.storage_manager.artifacts.extend(artifacts)
-            batch_filenames = self.storage_manager.save(artifacts)
+            batch_filenames = self.storage_manager.save(self.output_folder, artifacts)
 
-            for i, artifact_bundle in enumerate(batch):
+            for i, artifact in enumerate(artifacts):
                 run_context = self.build_run_context(
                     benchmarker, 
-                    artifact_bundle,
+                    artifact.item_extras,
                     batch_filenames[i]
                 )
                 generation_metadata_record = self.GenerationRecordClass(
@@ -108,3 +130,12 @@ class Runner():
                 data_row = generation_metadata_record.create_data_row()
                 self.storage_manager.data_connection.append_data(data_row)
             
+
+    def save_config(self):
+        config = copy.deepcopy(self.experiment.config)
+        config["experiment"]["experiment_id"] = self.experiment.experiment_id
+        config["experiment"]["artifact_folder"] = str(self.output_folder)
+        config["experiment"]["experiment_folder"] = str(self.experiment_folder)
+
+        self.experiment_config_path = Path(self.experiment_folder / "experiment.yaml")
+        self.storage_manager.dump_config(config, self.experiment_config_path)
