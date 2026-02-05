@@ -11,7 +11,6 @@ class ListVariable(Variable):
         
 
     def get_values(self):
-        print(self.config)
         return self.config["items"]
 
     

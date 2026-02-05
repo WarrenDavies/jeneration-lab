@@ -95,7 +95,6 @@ class Experiment():
 
     def run(self):
         for inference_config in self.inference_configs:
-            print(inference_config)
             self.generator.config.update(inference_config)
             with Benchmarker() as benchmarker:
                 self.generator.run_pipeline()

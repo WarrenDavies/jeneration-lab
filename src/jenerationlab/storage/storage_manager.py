@@ -50,7 +50,7 @@ class StorageManager():
         batch_filenames = []
         for i, artifact in enumerate(artifacts):
             generation_no = str((len(self.filenames) + 1)).zfill(4)
-            file_name = f"{generation_no}_{save_timestamp}_no{i + 1}"
+            file_name = f"{generation_no}_{save_timestamp}_no{i + 1}{artifact.extension}"
             batch_filenames.append(file_name)
             self.filenames.append(file_name)
             print("saving ", file_name)
@@ -67,10 +67,10 @@ class StorageManager():
             self.core_config[""]
         )
 
-    
+
     def create_data_store(self, headers):
         self.data_connection.create_new_data_source(headers)
 
-    
+
     def dump_config(self, config, path):
         yaml.safe_dump(config, open(path, "w"))

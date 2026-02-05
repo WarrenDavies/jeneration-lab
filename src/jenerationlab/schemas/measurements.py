@@ -3,7 +3,9 @@ from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field
 
+from jenerationlab.schemas.registry import register
 
+@register("measurements")
 class MeasurementSchema(BaseModel):
     measurement_id: str = ""
     artifact_id: str = ""

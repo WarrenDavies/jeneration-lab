@@ -5,7 +5,10 @@ outputs_path: "./outputs"
 data_connections:
   experiments:
     output_data_type: "csv"
-    data_source_location: "./data/experiment_results.csv"
+    data_source_location: "./data/experiments.csv"
   measurements:
     output_data_type: "csv"
     data_source_location: "./data/measurements.csv"
+  artifacts:
+    output_data_type: "csv"
+    data_source_location: "./data/artifacts.csv"
