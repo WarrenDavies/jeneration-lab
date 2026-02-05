@@ -67,10 +67,10 @@ class StorageManager():
             self.core_config[""]
         )
 
-    
+
     def create_data_store(self, headers):
         self.data_connection.create_new_data_source(headers)
 
-    
+
     def dump_config(self, config, path):
         yaml.safe_dump(config, open(path, "w"))
