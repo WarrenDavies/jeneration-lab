@@ -41,6 +41,41 @@ variables:
           content: |
             Can you read this message? Please reply only yes or no.
 
+benchmark:
+  from_file: ""
+  global_system_prompt: 
+    role: system
+    content: |
+      You are a helpful AI assistant.
+  cases:
+    - case_id: "2_x_2"
+      messages:
+        - role: user
+          content: |
+            What is 2 * 2? Respond only with the answer as an integer
+      processing: 
+        - function: "strip_backticks"
+          params: {}
+      evaluations: 
+        - function: "is_exact"
+          params: {}
+          expected: "4"
+    - case_id: "5_lines"
+      messages:
+        - role: user
+          content: |
+            Explain how transformers work in LLMs. Your reponse should have 5 sentences. Each sentence should be on a new line.
+      processing: 
+        - function: "strip_backticks"
+          params: {}
+      evaluations:
+        - function: "count_lines"
+          params: {}
+          expected: "5"
+        - function: "count_sentences"
+          params: {}
+          expected: "5"
+
 ratings:
   composition: 
     type: "int"
