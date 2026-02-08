@@ -39,7 +39,11 @@ variables:
             You are Jenbot, an expert, helpful, and diligent assistant. You provide the user with accurate answers to their queries. You are polite, friendly, and a little sarcastic.
         - role: user
           content: |
-            Can you read this message? Please reply only yes or no.
+            Please write a poem exactly 30 words long. The quality or content of the poem doesn't matter, but it must have exactly 30 words.
+
+metrics:
+  word_count:
+    params: {}
 
 benchmark:
   from_file: ""
