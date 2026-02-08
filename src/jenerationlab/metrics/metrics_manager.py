@@ -1,27 +1,33 @@
 from pathlib import Path
+import uuid
+import datetime
 
-from jenerationlab.metrics import registry
+from jenerationlab.metrics import registry as metrics_registry
+from jenerationutils.jenerationrecord import registry as recorder_registry
+from jenerationlab.schemas.measurements import MeasurementSchema
 
 
 class MetricsManager():
     """
     """
-    def __init__(self, config, storage_manager):
-        self.config = config["metrics"]
-        self.experiment_config = config["experiment"]
+    def __init__(self, core_config, experiment_config, storage_manager):
+        self.config = core_config
+        self.experiment_config = experiment_config
         self.ARTIFACT_GETTERS = {
             "image": self.get_image_artifact,
             "text": self.get_text_artifact
         }
         self.get_artifact = self.ARTIFACT_GETTERS[
-            self.experiment_config["generation_format"]
+            self.experiment_config["experiment"]["generation_format"]
         ]
         self.storage_manager = storage_manager
-        self.artifact_folder = self.experiment_config["artifact_folder"]
+        self.artifact_folder = self.experiment_config["experiment"]["artifact_folder"]
         self.metric_calculators = self.get_metrics_calculators()
         self.df_all_measurements = self.import_data_to_df("measurements")
         self.df_artifacts = self.import_data_to_df("artifacts")       
-
+        self.GenerationRecordClass = recorder_registry.get_class(
+            core_config["data_connections"]["measurements"]["output_data_type"]
+        )
 
     def import_data_to_df(self, data_source):
         conn = self.storage_manager.data_connections[data_source]
@@ -48,11 +54,11 @@ class MetricsManager():
         """
         df_artifacts = self.filter_to_experiment(
             self.df_artifacts,
-            self.experiment_config["experiment_id"]
+            self.experiment_config["experiment"]["experiment_id"]
         )
         df_measurements = self.filter_to_experiment(
             self.df_all_measurements,
-            self.experiment_config["experiment_id"]
+            self.experiment_config["experiment"]["experiment_id"]
         )
         df_artifacts_with_metric = self.filter_to_rows_with_measurement(
             df_measurements,
@@ -69,9 +75,9 @@ class MetricsManager():
     def get_metrics_calculators(self):
         metric_calculators = {}
 
-        for metric_calculator in self.config:
+        for metric_calculator in self.experiment_config["metrics"]:
             metric_calculators[metric_calculator] = (
-                registry.get_object(metric_calculator)
+                metrics_registry.get_object(metric_calculator)
             )
 
         return metric_calculators
@@ -98,11 +104,70 @@ class MetricsManager():
         pass
 
 
-   
+    @staticmethod
+    def get_rating_type_key(rating):
+        TYPE_MAP = {
+            int: "value_int",
+            float: "value_float",
+            str: "value_str",
+            bool: "value_bool",
+        }
+
+        value_type = TYPE_MAP.get(type(rating))
+        if not value_type:
+            raise ValueError(f"Unsupported rating type: {type(rating)}")
+
+        return value_type
+
+
+    def build_measurement_record(self, artifact_id, rating_name, rating):
+
+        rating_type_key = self.get_rating_type_key(rating)
+
+        values = {
+            "value_int": None,
+            "value_float": None,
+            "value_str": None,
+            "value_bool": None
+        }
+        values[rating_type_key] = rating
+
+        measurement_record = {
+            "measurement_id": uuid.uuid4().hex[:8],
+            "artifact_id": artifact_id,
+            "experiment_id": self.experiment_config["experiment"]["experiment_id"],
+            "timestamp": datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+            "producer": "auto",
+            "measurement_name": rating_name,
+            **values
+        }
+
+        return measurement_record
+
+
+    def save_rating(self, measurement_record):
+        data_row = measurement_record.create_data_row()
+        self.storage_manager.data_connections["measurements"].append_data(
+            data_row
+        )
+
+
     def calculate_metrics(self):
         
-        for metric in self.config:
-            queue = self.get_queue(metric)
-            for task in queue:
-                artifact = self.get_artifact(task)
-                metric = self.metric_calculators[metric].calculate(artifact)
+        for metric_name in self.experiment_config["metrics"]:
+            queue = self.get_queue(metric_name)
+            for artifact_id in queue:
+                artifact = self.get_artifact(artifact_id)
+                metric_value = self.metric_calculators[metric_name].calculate(artifact)
+
+                measurement_record = self.build_measurement_record(
+                    artifact_id,
+                    metric_name,
+                    metric_value
+                )
+                measurement_record = self.GenerationRecordClass(
+                    schema=MeasurementSchema,
+                    generation_metadata = measurement_record
+                )
+                self.save_rating(measurement_record)
+
