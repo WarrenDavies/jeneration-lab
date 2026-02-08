@@ -9,6 +9,10 @@ class MetricsManager():
     def __init__(self, config, storage_manager):
         self.config = config["metrics"]
         self.experiment_config = config["experiment"]
+        self.ARTIFACT_GETTERS = {
+            "image": self.get_image_artifact,
+            "text": self.get_text_artifact
+        }
         self.storage_manager = storage_manager
         self.artifact_folder = self.experiment_config["artifact_folder"]
         self.metric_calculators = self.get_metrics_calculators()
@@ -92,12 +96,9 @@ class MetricsManager():
 
 
     def get_artifact(self, artifact_id):
-        GET_ARTIFACT_FUNC_REGISTRY = {
-            "image": self.get_image_artifact,
-            "text": self.get_text_artifact
-        }
+        
 
-        func = GET_ARTIFACT_FUNC_REGISTRY[
+        func = self.ARTIFACT_GETTERS[
             self.experiment_config["generation_format"]
         ]
 
