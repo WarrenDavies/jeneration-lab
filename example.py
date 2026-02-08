@@ -20,10 +20,8 @@ runner.run()
 with open(str(runner.experiment_config_path), 'r') as stream:
     experiment_config = yaml.safe_load(stream)
 
-
 metrics_manager = MetricsManager(core_config, experiment_config, storage_manager)
 metrics_manager.calculate_metrics()
-
 
 rating_manager = Rater(core_config, experiment_config, storage_manager)
 requested_ratings = experiment_config["ratings"].keys()
