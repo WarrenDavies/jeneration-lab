@@ -170,4 +170,3 @@ class MetricsManager():
                     generation_metadata = measurement_record
                 )
                 self.save_rating(measurement_record)
-
