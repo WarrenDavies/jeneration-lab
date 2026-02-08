@@ -171,28 +171,32 @@ class Runner():
     def run(self):
         """
         """
-        for inference_config in self.experiment.inference_configs:
-            if self.experiment_config["experiment"]["reset_model_each_run"]:
-                self.experiment.generator.prepare()
-            
-            param_changes = self.get_param_changes(inference_config)
-            self.reload_generator_if_needed(inference_config, param_changes)
+        for case in self.experiment.benchmarking_manager.cases:
+            for inference_config in self.experiment.inference_configs:
+                if self.experiment_config["experiment"]["reset_model_each_run"]:
+                    self.experiment.generator.prepare()
+                
+                if "messages" in case:
+                    inference_config["messages"] = case["messages"]
 
-            with Benchmarker() as benchmarker:
-                output = self.experiment.generator.generate()
+                param_changes = self.get_param_changes(inference_config)
+                self.reload_generator_if_needed(inference_config, param_changes)
 
-            artifacts = [artifact for artifact in output.batch]
-            batch_filenames = self.save_output_to_disk(artifacts)
+                with Benchmarker() as benchmarker:
+                    output = self.experiment.generator.generate()
 
-            for i, artifact in enumerate(artifacts):
-                run_context = self.build_run_context(
-                    benchmarker, 
-                    artifact.item_extras,
-                    batch_filenames[i]
-                )
-                self.save_metadata("artifacts", run_context)
-                self.save_generation_timing("measurements", run_context)
-            self.save_metadata("experiments", run_context)
+                artifacts = [artifact for artifact in output.batch]
+                batch_filenames = self.save_output_to_disk(artifacts)
+
+                for i, artifact in enumerate(artifacts):
+                    run_context = self.build_run_context(
+                        benchmarker, 
+                        artifact.item_extras,
+                        batch_filenames[i]
+                    )
+                    self.save_metadata("artifacts", run_context)
+                    self.save_generation_timing("measurements", run_context)
+                self.save_metadata("experiments", run_context)
             
 
     def save_config(self):

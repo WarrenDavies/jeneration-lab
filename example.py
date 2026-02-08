@@ -4,6 +4,7 @@ from jenerationlab.core.experiment import Experiment
 from jenerationlab.core.runner import Runner
 from jenerationlab.storage.storage_manager import StorageManager
 from jenerationlab.metrics.metrics_manager import MetricsManager
+from jenerationlab.benchmarking.benchmarking_manager import BenchmarkingManager
 from jenerationlab.rater.rater import Rater
 
 with open("configs/experiment_demo_llm.yaml", 'r') as stream:
@@ -14,6 +15,7 @@ with open("configs/core_config.yaml", 'r') as stream:
 
 experiment = Experiment(experiment_config)
 storage_manager = StorageManager(core_config, experiment_config)
+
 runner = Runner(core_config, experiment_config, experiment, storage_manager)
 runner.run()
 

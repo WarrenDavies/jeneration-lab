@@ -45,9 +45,9 @@ metrics:
   word_count:
     params: {}
 
-benchmark:
+benchmarking:
   from_file: ""
-  global_system_prompt: 
+  benchmark_system_prompt: 
     role: system
     content: |
       You are a helpful AI assistant.
@@ -60,7 +60,7 @@ benchmark:
       processing: 
         - function: "strip_backticks"
           params: {}
-      evaluations: 
+      checks: 
         - function: "is_exact"
           params: {}
           expected: "4"
@@ -72,7 +72,7 @@ benchmark:
       processing: 
         - function: "strip_backticks"
           params: {}
-      evaluations:
+      checks:
         - function: "count_lines"
           params: {}
           expected: "5"

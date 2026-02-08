@@ -9,6 +9,7 @@ from jenerationutils.benchmarker.benchmarker import Benchmarker
 
 from jenerationlab.variables import registry as variable_registry
 from jenerationlab.core.generators import generator_registries
+from jenerationlab.benchmarking.benchmarking_manager import BenchmarkingManager
 
 class Experiment():
     """
@@ -17,6 +18,7 @@ class Experiment():
         """
         """
         self.experiment_id = uuid.uuid4().hex[:8]
+        self.benchmarking_manager = None
         self.config = config
         self.generator_config = self.process_generator_config()
         self.generator = self.get_generator()
@@ -24,6 +26,27 @@ class Experiment():
         self.inference_configs = self.get_inference_configs()
         self.generator.load()
         self.generator.prepare()
+        self.process_benchmarking()
+
+
+    def process_benchmarking(self):
+        
+        benchmarking_not_defined = "benchmarking" not in self.config
+        format_is_image = self.config["experiment"]["generation_format"] == "image"
+
+        if benchmarking_not_defined or format_is_image:
+            ## create mock benchmark
+            return
+        
+        self.benchmarking_manager = BenchmarkingManager(
+            self.config["benchmarking"]
+        )
+
+        self.variables = (
+            self.benchmarking_manager.remove_message_variables(self.variables)
+        )
+
+        self.benchmarking_manager.create_cases()
 
 
     def process_generator_config(self):
