@@ -11,5 +11,4 @@ class WordCount(BaseMetric):
         
     def calculate(self, output):
         word_count = len(output.lower().split())
-        print(word_count)
         return word_count

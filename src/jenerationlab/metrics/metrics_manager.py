@@ -13,6 +13,9 @@ class MetricsManager():
             "image": self.get_image_artifact,
             "text": self.get_text_artifact
         }
+        self.get_artifact = self.ARTIFACT_GETTERS[
+            self.experiment_config["generation_format"]
+        ]
         self.storage_manager = storage_manager
         self.artifact_folder = self.experiment_config["artifact_folder"]
         self.metric_calculators = self.get_metrics_calculators()
@@ -95,20 +98,11 @@ class MetricsManager():
         pass
 
 
-    def get_artifact(self, artifact_id):
-        
-
-        func = self.ARTIFACT_GETTERS[
-            self.experiment_config["generation_format"]
-        ]
-
-        return func(artifact_id)
-
-    
+   
     def calculate_metrics(self):
         
         for metric in self.config:
             queue = self.get_queue(metric)
             for task in queue:
                 artifact = self.get_artifact(task)
-                self.metric_calculators[metric].calculate(artifact)
+                metric = self.metric_calculators[metric].calculate(artifact)
