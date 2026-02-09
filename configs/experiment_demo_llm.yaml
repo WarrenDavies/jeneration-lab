@@ -57,7 +57,7 @@ benchmarking:
         - role: user
           content: |
             What is 2 * 2? Respond only with the answer as an integer
-      post_processing: 
+      processing: 
         - function: "strip_backticks"
           params: {}
       checks: 
@@ -69,7 +69,7 @@ benchmarking:
         - role: user
           content: |
             Explain how transformers work in LLMs. Your reponse should have 5 sentences. Each sentence should be on a new line.
-      post_processing: 
+      processing: 
         - function: "strip_backticks"
           params: {}
       checks:
