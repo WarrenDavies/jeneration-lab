@@ -171,8 +171,8 @@ class Runner():
     def run(self):
         """
         """
-        for case in self.experiment.benchmarking_manager.cases:
-            for inference_config in self.experiment.inference_configs:
+        for inference_config in self.experiment.inference_configs:
+            for case in self.experiment.benchmarking_manager.cases:
                 if self.experiment_config["experiment"]["reset_model_each_run"]:
                     self.experiment.generator.prepare()
                 

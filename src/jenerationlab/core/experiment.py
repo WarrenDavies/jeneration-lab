@@ -35,16 +35,14 @@ class Experiment():
         format_is_image = self.config["experiment"]["generation_format"] == "image"
 
         if benchmarking_not_defined or format_is_image:
-            ## create mock benchmark
-            return
-        
-        self.benchmarking_manager = BenchmarkingManager(
-            self.config["benchmarking"]
-        )
-
-        self.variables = (
-            self.benchmarking_manager.remove_message_variables(self.variables)
-        )
+            self.benchmarking_manager = BenchmarkingManager()
+        else:
+            self.benchmarking_manager = BenchmarkingManager(
+                self.config["benchmarking"]
+            )
+            self.variables = (
+                self.benchmarking_manager.remove_message_variables(self.variables)
+            )
 
         self.benchmarking_manager.create_cases()
 
@@ -79,7 +77,7 @@ class Experiment():
         self.generator.load()
         self.generator.prepare()
 
-        
+
     def define_variables(self):
         variables = []
         for variable_name in self.config["variables"]:
