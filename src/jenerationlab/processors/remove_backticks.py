@@ -3,7 +3,7 @@ from jenerationlab.processors.registry import register
 
 
 @register("word_count")
-class RemoveBackticks(BaseProcessor):
+class RemoveCodeFences(BaseProcessor):
     """
     """
     def __init__(self):
