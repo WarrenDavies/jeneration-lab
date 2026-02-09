@@ -58,7 +58,7 @@ benchmarking:
           content: |
             What is 2 * 2? Respond only with the answer as an integer
       processing: 
-        - function: "strip_backticks"
+        - function: "remove_code_fences"
           params: {}
       checks: 
         - function: "is_exact"

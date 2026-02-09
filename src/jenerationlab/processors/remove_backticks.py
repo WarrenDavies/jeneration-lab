@@ -2,7 +2,7 @@ from jenerationlab.processors.base_processor import BaseProcessor
 from jenerationlab.processors.registry import register
 
 
-@register("word_count")
+@register("remove_code_fences")
 class RemoveCodeFences(BaseProcessor):
     """
     """
