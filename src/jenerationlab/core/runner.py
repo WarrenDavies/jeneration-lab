@@ -64,22 +64,28 @@ class Runner():
         return ParamsSchema
 
 
-    def build_run_context(self, execution_time, artifact_bundle, filename, case_id):
+    def build_run_context(self, artifact, filename):
+        artifact.item_extras = {"test": "hello"}
         run_context = self.run_context.copy()
         run_context["artifact_id"] = uuid.uuid4().hex[:8]
         run_context["timestamp"] = self.start_timestamp_str
-        run_context["batch_generation_time"] = execution_time
-        run_context["generation_time"] = execution_time / self.experiment.generator.batch_size
+        run_context["batch_generation_time"] = artifact.generation_time
+        run_context["generation_time"] = artifact.generation_time / self.experiment.generator.batch_size
         run_context["params"] = json.dumps(
             dict(self.ParamsSchema(**{
                 **self.experiment.generator.config,
-                **artifact_bundle
             })),
+            sort_keys=True
+        )
+        run_context["extras"] = json.dumps(
+            dict(**{
+                **artifact.item_extras,
+            }),
             sort_keys=True
         )
         run_context["filename"] = filename
         run_context["output_path"] = str(self.output_folder)
-        run_context["case_id"] = case_id
+        run_context["case_id"] = artifact.case_id
         return run_context
 
 
@@ -168,6 +174,11 @@ class Runner():
         return batch_filenames
 
 
+    def add_case_id(self, artifacts, case_id):
+        for artifact in artifacts:
+            artifact.case_id = case_id
+        return artifacts
+
     def run(self):
         """
         """
@@ -185,15 +196,14 @@ class Runner():
                 with Benchmarker() as generation_benchmarker:
                     output = self.experiment.generator.generate()
                 artifacts = generation_benchmarker.add_timing(output.batch)
+                artifacts = self.add_case_id(artifacts, case["case_id"])
 
                 batch_filenames = self.save_output_to_disk(artifacts)
 
                 for i, artifact in enumerate(artifacts):
                     run_context = self.build_run_context(
-                        generation_benchmarker.execution_time, 
-                        artifact.item_extras,
-                        batch_filenames[i],
-                        case["case_id"]
+                        artifact,
+                        batch_filenames[i]
                     )
                     self.save_metadata("artifacts", run_context)
                     self.save_generation_timing("measurements", run_context)
