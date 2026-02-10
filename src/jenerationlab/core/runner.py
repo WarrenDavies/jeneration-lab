@@ -64,12 +64,12 @@ class Runner():
         return ParamsSchema
 
 
-    def build_run_context(self, benchmarker, artifact_bundle, filename, case_id):
+    def build_run_context(self, execution_time, artifact_bundle, filename, case_id):
         run_context = self.run_context.copy()
         run_context["artifact_id"] = uuid.uuid4().hex[:8]
         run_context["timestamp"] = self.start_timestamp_str
-        run_context["batch_generation_time"] = benchmarker.execution_time
-        run_context["generation_time"] = benchmarker.execution_time / self.experiment.generator.batch_size
+        run_context["batch_generation_time"] = execution_time
+        run_context["generation_time"] = execution_time / self.experiment.generator.batch_size
         run_context["params"] = json.dumps(
             dict(self.ParamsSchema(**{
                 **self.experiment.generator.config,
@@ -182,15 +182,15 @@ class Runner():
                 param_changes = self.get_param_changes(inference_config)
                 self.reload_generator_if_needed(inference_config, param_changes)
 
-                with Benchmarker() as benchmarker:
+                with Benchmarker() as generation_benchmarker:
                     output = self.experiment.generator.generate()
+                artifacts = generation_benchmarker.add_timing(output.batch)
 
-                artifacts = [artifact for artifact in output.batch]
                 batch_filenames = self.save_output_to_disk(artifacts)
 
                 for i, artifact in enumerate(artifacts):
                     run_context = self.build_run_context(
-                        benchmarker, 
+                        generation_benchmarker.execution_time, 
                         artifact.item_extras,
                         batch_filenames[i],
                         case["case_id"]
