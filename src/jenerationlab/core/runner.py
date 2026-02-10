@@ -64,7 +64,7 @@ class Runner():
         return ParamsSchema
 
 
-    def build_run_context(self, benchmarker, artifact_bundle, filename):
+    def build_run_context(self, benchmarker, artifact_bundle, filename, case_id):
         run_context = self.run_context.copy()
         run_context["artifact_id"] = uuid.uuid4().hex[:8]
         run_context["timestamp"] = self.start_timestamp_str
@@ -79,7 +79,7 @@ class Runner():
         )
         run_context["filename"] = filename
         run_context["output_path"] = str(self.output_folder)
-
+        run_context["case_id"] = case_id
         return run_context
 
 
@@ -192,7 +192,8 @@ class Runner():
                     run_context = self.build_run_context(
                         benchmarker, 
                         artifact.item_extras,
-                        batch_filenames[i]
+                        batch_filenames[i],
+                        case["case_id"]
                     )
                     self.save_metadata("artifacts", run_context)
                     self.save_generation_timing("measurements", run_context)
