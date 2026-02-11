@@ -67,7 +67,7 @@ class Runner():
     def build_run_context(self, artifact, filename):
         artifact.item_extras = {"test": "hello"}
         run_context = self.run_context.copy()
-        run_context["artifact_id"] = uuid.uuid4().hex[:8]
+        run_context["artifact_id"] = artifact.artifact_id
         run_context["timestamp"] = self.start_timestamp_str
         run_context["batch_generation_time"] = artifact.generation_time
         run_context["generation_time"] = artifact.generation_time / self.experiment.generator.batch_size
@@ -179,6 +179,13 @@ class Runner():
             artifact.case_id = case_id
         return artifacts
 
+
+    def add_timing(self, artifacts, execution_time):
+        for artifact in artifacts:
+            artifact.generation_time = execution_time
+        return artifacts
+
+
     def run(self):
         """
         """
@@ -193,9 +200,9 @@ class Runner():
                 param_changes = self.get_param_changes(inference_config)
                 self.reload_generator_if_needed(inference_config, param_changes)
 
-                with Benchmarker() as generation_benchmarker:
+                with Benchmarker() as timer:
                     output = self.experiment.generator.generate()
-                artifacts = generation_benchmarker.add_timing(output.batch)
+                artifacts = self.add_timing(output.batch, timer.execution_time)
                 artifacts = self.add_case_id(artifacts, case["case_id"])
 
                 batch_filenames = self.save_output_to_disk(artifacts)

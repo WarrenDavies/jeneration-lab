@@ -7,6 +7,7 @@ from jenerationlab.schemas.registry import register
 @register("artifacts")
 class ArtifactSchema(BaseModel):
     artifact_id: str = ""
+    parent_artifact_id: str = ""
     case_id: str = ""
     experiment_id: str = ""
     filename: str = ""
@@ -16,5 +17,3 @@ class ArtifactSchema(BaseModel):
     params: str = ""
     extras: str = ""
     timestamp: str = ""
-    params: str = ""
-    extras: str = ""
