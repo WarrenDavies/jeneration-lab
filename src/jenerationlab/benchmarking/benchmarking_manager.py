@@ -1,6 +1,7 @@
 from jenerationlab.benchmarking.checks.functions import CHECKS_REGISTRY
 
 DEFAULT_CONFIG = {
+    "default": True,
     "cases": [
         {"case_id": None}
     ]

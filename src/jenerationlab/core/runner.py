@@ -38,6 +38,10 @@ class Runner():
         self.save_config()
 
 
+    def create_id(self):
+        return uuid.uuid4().hex[:8]
+
+
     def setup_experiment_folders(self, experiment_folder_name):
         self.experiment_folder_name = experiment_folder_name
 
@@ -65,28 +69,43 @@ class Runner():
         return ParamsSchema
 
 
-    def build_run_context(self, artifact, filename):
-        artifact.item_extras = {"test": "hello"}
+    def build_run_context(self, benchmark_run_id, artifact, filename):
+
         run_context = self.run_context.copy()
-        run_context["artifact_id"] = artifact.artifact_id
+
+        run_context["benchmark_run_id"] = benchmark_run_id
         run_context["timestamp"] = self.start_timestamp_str
-        run_context["batch_generation_time"] = artifact.generation_time
-        run_context["generation_time"] = artifact.generation_time / self.experiment.generator.batch_size
         run_context["params"] = json.dumps(
             dict(self.ParamsSchema(**{
                 **self.experiment.generator.config,
             })),
             sort_keys=True
         )
+        run_context["output_path"] = str(self.output_folder)
+
+        run_context["artifact_id"] = artifact.artifact_id
+        run_context["batch_generation_time"] = artifact.generation_time
+        run_context["generation_time"] = artifact.generation_time / self.experiment.generator.batch_size
         run_context["extras"] = json.dumps(
             dict(**{
                 **artifact.item_extras,
             }),
             sort_keys=True
         )
-        run_context["filename"] = filename
-        run_context["output_path"] = str(self.output_folder)
         run_context["case_id"] = artifact.case_id
+        
+        run_context["filename"] = filename
+        
+        return run_context
+
+
+    def update_run_context(self, run_context, *additions):
+
+        for addition in additions:
+            if hasattr(new_data, '__dict__'):
+                addition = vars(addition)
+            run_context.update(addition)
+
         return run_context
 
 
@@ -225,10 +244,22 @@ class Runner():
             self.save_metadata("checks", check_run_context)
 
 
+    def get_benchmark_run_id(self):
+        if "default" in self.experiment.benchmarking_manager.cases[0]:
+            benchmark_run_id = ""
+        else:
+            benchmark_run_id = self.create_id()
+
+        return benchmark_run_id
+        
+
     def run(self):
         """
         """
+        benchmark_run_ids = []
         for inference_config in self.experiment.inference_configs:
+            benchmark_run_id = self.get_benchmark_run_id()
+            benchmark_run_ids.append(benchmark_run_id)
             for case in self.experiment.benchmarking_manager.cases:
                 if self.experiment_config["experiment"]["reset_model_each_run"]:
                     self.experiment.generator.prepare()
@@ -248,6 +279,7 @@ class Runner():
 
                 for i, artifact in enumerate(artifacts):
                     run_context = self.build_run_context(
+                        benchmark_run_id,
                         artifact,
                         batch_filenames[i]
                     )
@@ -259,7 +291,7 @@ class Runner():
 
                     self.run_checks(case, artifact, run_context)
 
-                self.save_metadata("experiments", run_context)
+        self.save_metadata("experiments", run_context)
 
 
     def save_config(self):

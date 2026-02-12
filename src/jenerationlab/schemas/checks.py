@@ -10,6 +10,7 @@ class ChecksSchema(BaseModel):
     check_id: str = ""
     case_id: str = ""
     artifact_id: str = ""
+    benchmark_run_id: str = ""
     experiment_id: str = ""
     timestamp: str = ""
     check_func: str = ""

@@ -1,9 +1,7 @@
 CHECKS_REGISTRY = {}
 
 def register(name):
-    print("ojioj")
     def decorator(func):
-        print("registering")
         CHECKS_REGISTRY[name] = func
         return func
     return decorator

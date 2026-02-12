@@ -9,6 +9,7 @@ class ArtifactSchema(BaseModel):
     artifact_id: str = ""
     parent_artifact_id: str = ""
     case_id: str = ""
+    benchmark_run_id: str = ""
     experiment_id: str = ""
     filename: str = ""
     model: str = ""
