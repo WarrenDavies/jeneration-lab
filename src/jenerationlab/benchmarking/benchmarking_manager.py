@@ -1,3 +1,5 @@
+from jenerationlab.benchmarking.checks.functions import CHECKS_REGISTRY
+
 DEFAULT_CONFIG = {
     "cases": [
         {"case_id": None}
@@ -8,8 +10,16 @@ DEFAULT_CONFIG = {
 class BenchmarkingManager():
     """
     """
+
     def __init__(self, benchmarking_config = DEFAULT_CONFIG):
         self.benchmarking_config = benchmarking_config
+        self.CHECKS_REGISTRY = CHECKS_REGISTRY
+
+
+    def run_check(self, check_name, params, output):
+        check_func = self.CHECKS_REGISTRY[check_name]
+        check_result = check_func(params, output)
+        return check_result
 
 
     def remove_message_variables(self, variables):

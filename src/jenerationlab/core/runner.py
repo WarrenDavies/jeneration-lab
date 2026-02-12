@@ -3,6 +3,7 @@ import sys
 import json
 import copy
 import uuid
+import copy
 
 from pydantic import BaseModel
 from pathlib import Path
@@ -13,7 +14,6 @@ from jenerationutils.jenerationrecord import registry as recorder_registry
 from jenerationlab.schemas.base import BaseSchema
 from jenerationlab.schemas.registry import get_schema_class
 from jenerationlab.rater.rater import Rater
-from jenerationlab.benchmarking.checks.functions import run_check
 
 
 class Runner():
@@ -207,6 +207,24 @@ class Runner():
         return artifacts
 
 
+    def run_checks(self, case, artifact, run_context):
+        for check in case["checks"]:
+            check_run_context = copy.deepcopy(run_context)
+
+            check_result = self.experiment.benchmarking_manager.run_check(
+                check["function"],
+                check["params"],
+                artifact.data
+            )
+
+            check_run_context = self.build_check_run_context(
+                run_context,
+                check, 
+                check_result
+            )
+            self.save_metadata("checks", check_run_context)
+
+
     def run(self):
         """
         """
@@ -239,20 +257,7 @@ class Runner():
                     if "checks" not in case:
                         continue
 
-                    for check in case["checks"]:
-                        check_result = run_check(
-                            check["function"],
-                            check["params"],
-                            artifact.data
-                        )
-                        print("check_result:", check_result)
-                        check_run_context = self.build_check_run_context(
-                            run_context,
-                            check, 
-                            check_result
-                        )
-                        self.save_metadata("checks", check_run_context)
-
+                    self.run_checks(case, artifact, run_context)
 
                 self.save_metadata("experiments", run_context)
 

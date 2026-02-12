@@ -1,16 +1,13 @@
 CHECKS_REGISTRY = {}
 
 def register(name):
+    print("ojioj")
     def decorator(func):
+        print("registering")
         CHECKS_REGISTRY[name] = func
         return func
     return decorator
 
-def run_check(func, params, output):
-    func_ = CHECKS_REGISTRY[func]
-    check_result = func_(params, output)
-    return check_result
-    
 
 @register("is_exact")
 def is_exact(params, output):
