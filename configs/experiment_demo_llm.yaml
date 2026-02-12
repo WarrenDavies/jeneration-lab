@@ -62,8 +62,8 @@ benchmarking:
           params: {}
       checks: 
         - function: "is_exact"
-          params: {}
-          expected: "4"
+          params: 
+            expected: "4"
     - case_id: "5_lines"
       messages:
         - role: user
@@ -74,11 +74,11 @@ benchmarking:
           params: {}
       checks:
         - function: "count_lines"
-          params: {}
-          expected: "5"
-        - function: "count_sentences"
-          params: {}
-          expected: "5"
+          params:
+            expected: "5"
+        # - function: "count_sentences"
+        #   params:
+        #     expected: "5"
 
 ratings:
   composition: 

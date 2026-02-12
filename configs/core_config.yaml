@@ -12,3 +12,7 @@ data_connections:
   artifacts:
     output_data_type: "csv"
     data_source_location: "./data/artifacts.csv"
+  checks:
+    output_data_type: "csv"
+    data_source_location: "./data/checks.csv"
+  

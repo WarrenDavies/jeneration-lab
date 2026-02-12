@@ -13,6 +13,7 @@ from jenerationutils.jenerationrecord import registry as recorder_registry
 from jenerationlab.schemas.base import BaseSchema
 from jenerationlab.schemas.registry import get_schema_class
 from jenerationlab.rater.rater import Rater
+from jenerationlab.benchmarking.checks.functions import run_check
 
 
 class Runner():
@@ -214,8 +215,37 @@ class Runner():
                     )
                     self.save_metadata("artifacts", run_context)
                     self.save_generation_timing("measurements", run_context)
+
+                    if "checks" not in case:
+                        continue
+
+                    for check in case["checks"]:
+                        check_result = run_check(
+                            check["function"],
+                            check["params"],
+                            artifact.data
+                        )
+                        print("check_result:", check_result)
+                        check_run_context = run_context
+                        check_run_context["check_id"] = uuid.uuid4().hex[:8]
+                        check_run_context["check_func"] = check["function"]
+                        check_run_context["check_func_params"] = json.dumps(
+                            dict(**{
+                                **{
+                                    k: v 
+                                    for k, v in check["params"].items() 
+                                    if k != "expected"
+                                }
+                            }),
+                            sort_keys=True
+                        )
+                        check_run_context["expected"] = check["params"]["expected"]
+                        check_run_context["actual"] = check_result["actual"]
+                        self.save_metadata("checks", run_context)
+
+
                 self.save_metadata("experiments", run_context)
-            
+
 
     def save_config(self):
         config = copy.deepcopy(self.experiment.config)
