@@ -90,6 +90,26 @@ class Runner():
         return run_context
 
 
+    def build_check_run_context(self, run_context, check, check_result):
+        check_run_context = run_context
+        check_run_context["check_id"] = uuid.uuid4().hex[:8]
+        check_run_context["check_func"] = check["function"]
+        check_run_context["check_func_params"] = json.dumps(
+            dict(**{
+                **{
+                    k: v
+                    for k, v in check["params"].items()
+                    if k != "expected"
+                }
+            }),
+            sort_keys=True
+        )
+        check_run_context["expected"] = check["params"]["expected"]
+        check_run_context["actual"] = check_result["actual"]
+
+        return run_context
+
+
     def normalize_to_bundles(raw_output):
         items = raw_output if isinstance(raw_output, list) else [raw_output]
         normalized = []
@@ -226,22 +246,12 @@ class Runner():
                             artifact.data
                         )
                         print("check_result:", check_result)
-                        check_run_context = run_context
-                        check_run_context["check_id"] = uuid.uuid4().hex[:8]
-                        check_run_context["check_func"] = check["function"]
-                        check_run_context["check_func_params"] = json.dumps(
-                            dict(**{
-                                **{
-                                    k: v 
-                                    for k, v in check["params"].items() 
-                                    if k != "expected"
-                                }
-                            }),
-                            sort_keys=True
+                        check_run_context = self.build_check_run_context(
+                            run_context,
+                            check, 
+                            check_result
                         )
-                        check_run_context["expected"] = check["params"]["expected"]
-                        check_run_context["actual"] = check_result["actual"]
-                        self.save_metadata("checks", run_context)
+                        self.save_metadata("checks", check_run_context)
 
 
                 self.save_metadata("experiments", run_context)
