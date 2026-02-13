@@ -13,8 +13,8 @@ with open("configs/experiment_demo_llm.yaml", 'r') as stream:
 with open("configs/core_config.yaml", 'r') as stream:
     core_config = yaml.safe_load(stream)
 
-experiment = Experiment(experiment_config)
 storage_manager = StorageManager(core_config, experiment_config)
+experiment = Experiment(core_config, experiment_config, storage_manager)
 
 runner = Runner(core_config, experiment_config, experiment, storage_manager)
 runner.run()

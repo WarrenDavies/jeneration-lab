@@ -15,4 +15,7 @@ data_connections:
   checks:
     output_data_type: "csv"
     data_source_location: "./data/checks.csv"
+  case_results:
+    output_data_type: "csv"
+    data_source_location: "./data/case_results.csv"
   

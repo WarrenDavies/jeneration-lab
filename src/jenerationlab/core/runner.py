@@ -125,6 +125,7 @@ class Runner():
         )
         check_run_context["expected"] = check["params"]["expected"]
         check_run_context["actual"] = check_result["actual"]
+        check_run_context["score"] = check_result["score"]
 
         return run_context
 
@@ -259,7 +260,8 @@ class Runner():
         benchmark_run_ids = []
         for inference_config in self.experiment.inference_configs:
             benchmark_run_id = self.get_benchmark_run_id()
-            benchmark_run_ids.append(benchmark_run_id)
+            if benchmark_run_id:
+                benchmark_run_ids.append(benchmark_run_id)
             for case in self.experiment.benchmarking_manager.cases:
                 if self.experiment_config["experiment"]["reset_model_each_run"]:
                     self.experiment.generator.prepare()
@@ -292,6 +294,8 @@ class Runner():
                     self.run_checks(case, artifact, run_context)
 
         self.save_metadata("experiments", run_context)
+
+        self.experiment.benchmarking_manager.evaluate_benchmarks(benchmark_run_ids)
 
 
     def save_config(self):

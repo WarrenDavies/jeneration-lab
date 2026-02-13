@@ -64,21 +64,26 @@ benchmarking:
         - function: "is_exact"
           params: 
             expected: "4"
-    - case_id: "5_lines"
+      scoring:
+        min: 1
+    - case_id: "3_lines_no_the"
       messages:
         - role: user
           content: |
-            Explain how transformers work in LLMs. Your reponse should have 5 sentences. Each sentence should be on a new line.
+            Explain how transformers work in LLMs. Your reponse should have 3 short sentences and each sentence must be on a new line. You must not use the word "the".
       processing: 
         - function: "strip_backticks"
           params: {}
       checks:
         - function: "count_lines"
           params:
-            expected: "5"
-        # - function: "count_sentences"
-        #   params:
-        #     expected: "5"
+            expected: "3"
+        - function: "contains_word"
+          params:
+            substring: "the"
+            expected: "False"
+      scoring:
+        min: 2
 
 ratings:
   composition: 

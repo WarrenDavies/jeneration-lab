@@ -1,4 +1,5 @@
 from jenerationlab.benchmarking.checks.functions import CHECKS_REGISTRY
+from jenerationlab.benchmarking.benchmark_evaluator import BenchmarkEvaluator
 
 DEFAULT_CONFIG = {
     "default": True,
@@ -11,10 +12,16 @@ DEFAULT_CONFIG = {
 class BenchmarkingManager():
     """
     """
-
-    def __init__(self, benchmarking_config = DEFAULT_CONFIG):
+    def __init__(self, experiment_id, core_config, storage_manager, benchmarking_config = DEFAULT_CONFIG):
         self.benchmarking_config = benchmarking_config
+        self.core_config = core_config
         self.CHECKS_REGISTRY = CHECKS_REGISTRY
+        self.benchmark_evaluator = BenchmarkEvaluator(
+            experiment_id,
+            self.core_config,
+            self.benchmarking_config,
+            storage_manager
+        )
 
 
     def run_check(self, check_name, params, output):
@@ -36,3 +43,7 @@ class BenchmarkingManager():
         if "benchmark_system_prompt" in self.benchmarking_config:
             for case in self.cases:
                 case["messages"] = [self.benchmarking_config["benchmark_system_prompt"]] + case["messages"]
+
+
+    def evaluate_benchmarks(self, benchmark_run_ids):
+        self.benchmark_evaluator.evaluate(benchmark_run_ids)

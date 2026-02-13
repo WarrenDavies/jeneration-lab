@@ -14,12 +14,14 @@ from jenerationlab.benchmarking.benchmarking_manager import BenchmarkingManager
 class Experiment():
     """
     """
-    def __init__(self, config):
+    def __init__(self, core_config, experiment_config, storage_manager):
         """
         """
         self.experiment_id = uuid.uuid4().hex[:8]
+        self.storage_manager = storage_manager
         self.benchmarking_manager = None
-        self.config = config
+        self.core_config = core_config
+        self.config = experiment_config
         self.generator_config = self.process_generator_config()
         self.generator = self.get_generator()
         self.variables = self.define_variables()
@@ -35,9 +37,16 @@ class Experiment():
         format_is_image = self.config["experiment"]["generation_format"] == "image"
 
         if benchmarking_not_defined or format_is_image:
-            self.benchmarking_manager = BenchmarkingManager()
+            self.benchmarking_manager = BenchmarkingManager(
+                self.experiment_id,
+                self.core_config,
+                self.storage_manager
+            )
         else:
             self.benchmarking_manager = BenchmarkingManager(
+                self.experiment_id,
+                self.core_config,
+                self.storage_manager,
                 self.config["benchmarking"]
             )
             self.variables = (

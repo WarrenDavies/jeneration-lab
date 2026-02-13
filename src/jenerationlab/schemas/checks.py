@@ -17,3 +17,4 @@ class ChecksSchema(BaseModel):
     check_func_params: str = ""
     expected: str = ""
     actual: str = ""
+    score: int = None
