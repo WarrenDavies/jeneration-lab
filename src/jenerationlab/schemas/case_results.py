@@ -9,6 +9,7 @@ from jenerationlab.schemas.registry import register
 class CaseResultsSchema(BaseModel):
     case_result_id: str = ""
     experiment_id: str = ""
+    benchmark_run_id: str = ""
     case_id: str = ""
     sum_of_check_scores: float = None
     required_check_score: float = None

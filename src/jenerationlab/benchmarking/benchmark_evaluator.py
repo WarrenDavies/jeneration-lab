@@ -39,7 +39,7 @@ class BenchmarkEvaluator(BaseMetricsManager):
         return None
 
 
-    def build_case_result_record(self, score):
+    def build_case_result_record(self, score, benchmark_run_id):
         case = self.get_case_config_by_id(score["case_id"])
         required_check_score = case["scoring"]["min"]
         sum_of_check_scores = score["score"]
@@ -47,12 +47,38 @@ class BenchmarkEvaluator(BaseMetricsManager):
 
         record = score
         record["case_result_id"] = uuid.uuid4().hex[:8]
+        record["benchmark_run_id"] = benchmark_run_id
         record["sum_of_check_scores"] = record["score"]
         record["experiment_id"] = self.experiment_id
         record["ts"] = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         record["required_check_score"] = required_check_score
         record["sum_of_check_scores"] = sum_of_check_scores
         record["passed"] = passed
+
+        return record
+
+
+    def evaluate_benchmark(self, benchmark_run_id):
+        df_case_results = self.import_data_to_df("case_results")
+        df_run = self.filter_to_benchmarking_run(df_case_results, benchmark_run_id)
+        df_benchmark_score = (df_run
+            .groupby('benchmark_run_id')['passed']
+            .agg(
+                score='sum',
+                maximum='count',
+                percent=lambda x: x.sum() / x.count()
+            )
+            .reset_index()
+        )
+        benchmark_score = df_benchmark_score.to_dict("records")[0]
+        return benchmark_score
+
+
+    def build_benchmark_result_record(self, benchmark_run_id, benchmark_result_record):
+        record = benchmark_result_record
+        record["benchmark_run_id"] = benchmark_run_id
+        record["experiment_id"] = self.experiment_id
+        record["ts"] = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
         return record
 
@@ -72,5 +98,15 @@ class BenchmarkEvaluator(BaseMetricsManager):
             case_scores = self.evaluate_cases(benchmark_run_id)
 
             for case_score in case_scores:
-                case_result_record = self.build_case_result_record(case_score)
+                case_result_record = self.build_case_result_record(
+                    case_score,
+                    benchmark_run_id
+                )
                 self.save_metadata("case_results", case_result_record)
+
+            benchmark_score = self.evaluate_benchmark(benchmark_run_id)
+            benchmark_result_record = self.build_benchmark_result_record(
+                benchmark_run_id,
+                benchmark_score,
+            )
+            self.save_metadata("benchmark_results", benchmark_result_record)

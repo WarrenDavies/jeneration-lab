@@ -18,4 +18,6 @@ data_connections:
   case_results:
     output_data_type: "csv"
     data_source_location: "./data/case_results.csv"
-  
+  benchmark_results:
+    output_data_type: "csv"
+    data_source_location: "./data/benchmark_results.csv"
