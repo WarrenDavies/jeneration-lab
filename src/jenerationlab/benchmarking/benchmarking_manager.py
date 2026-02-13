@@ -12,16 +12,10 @@ DEFAULT_CONFIG = {
 class BenchmarkingManager():
     """
     """
-    def __init__(self, experiment_id, core_config, storage_manager, benchmarking_config = DEFAULT_CONFIG):
+    def __init__(self, experiment_id, storage_manager, benchmark_evaluator, benchmarking_config = DEFAULT_CONFIG):
         self.benchmarking_config = benchmarking_config
-        self.core_config = core_config
+        self.benchmark_evaluator = benchmark_evaluator
         self.CHECKS_REGISTRY = CHECKS_REGISTRY
-        self.benchmark_evaluator = BenchmarkEvaluator(
-            experiment_id,
-            self.core_config,
-            self.benchmarking_config,
-            storage_manager
-        )
 
 
     def run_check(self, check_name, params, output):

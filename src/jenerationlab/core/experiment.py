@@ -10,7 +10,7 @@ from jenerationutils.benchmarker.benchmarker import Benchmarker
 from jenerationlab.variables import registry as variable_registry
 from jenerationlab.core.generators import generator_registries
 from jenerationlab.benchmarking.benchmarking_manager import BenchmarkingManager
-
+from jenerationlab.benchmarking.benchmark_evaluator import BenchmarkEvaluator
 class Experiment():
     """
     """
@@ -43,10 +43,16 @@ class Experiment():
                 self.storage_manager
             )
         else:
-            self.benchmarking_manager = BenchmarkingManager(
+            self.benchmark_evaluator = BenchmarkEvaluator(
                 self.experiment_id,
                 self.core_config,
+                self.config["benchmarking"],
+                self.storage_manager
+            )
+            self.benchmarking_manager = BenchmarkingManager(
+                self.experiment_id,
                 self.storage_manager,
+                self.benchmark_evaluator,
                 self.config["benchmarking"]
             )
             self.variables = (

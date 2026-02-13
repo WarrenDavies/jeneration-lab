@@ -13,3 +13,4 @@ class CaseResultsSchema(BaseModel):
     sum_of_check_scores: float = None
     required_check_score: float = None
     passed: int = None
+    ts: str = ""

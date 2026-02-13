@@ -1,4 +1,5 @@
 import uuid
+import datetime
 
 from jenerationutils.jenerationrecord import registry as recorder_registry
 
@@ -48,6 +49,7 @@ class BenchmarkEvaluator(BaseMetricsManager):
         record["case_result_id"] = uuid.uuid4().hex[:8]
         record["sum_of_check_scores"] = record["score"]
         record["experiment_id"] = self.experiment_id
+        record["ts"] = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         record["required_check_score"] = required_check_score
         record["sum_of_check_scores"] = sum_of_check_scores
         record["passed"] = passed
