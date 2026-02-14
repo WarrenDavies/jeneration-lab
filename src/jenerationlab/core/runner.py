@@ -19,7 +19,10 @@ from jenerationlab.rater.rater import Rater
 class Runner():
     """
     """
-    def __init__(self, core_config, experiment_config, experiment, storage_manager):
+    def __init__(
+        self, core_config, experiment_config, 
+        experiment, storage_manager, processing_manager
+    ):
         """
         """
         self.start_timestamp_str = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -27,6 +30,7 @@ class Runner():
         self.experiment_config = experiment_config
         self.experiment = experiment
         self.storage_manager = storage_manager
+        self.processing_manager = processing_manager
         self.setup_experiment_folders(self.start_timestamp_str)
         self.GenerationRecordClass = recorder_registry.get_class(core_config["output_data_type"])
         self.run_context = {
@@ -274,6 +278,10 @@ class Runner():
 
                 with Benchmarker() as timer:
                     output = self.experiment.generator.generate()
+                    output = self.processing_manager.process_outputs(
+                        output, case
+                    )
+
                 artifacts = self.add_timing(output.batch, timer.execution_time)
                 artifacts = self.add_case_id(artifacts, case["case_id"])
 

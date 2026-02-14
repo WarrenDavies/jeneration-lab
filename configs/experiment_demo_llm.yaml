@@ -66,13 +66,53 @@ benchmarking:
             expected: "4"
       scoring:
         min: 1
+    - case_id: "remove_code_fences"
+      messages:
+        - role: user
+          content: |
+            return a json string with key "hello" and value "world" Surround the json in a triple-backtick code fence labelled "json". Do not include any whitespace.
+      checks: 
+        - function: "is_exact"
+          params: 
+            expected: |
+              ```json
+              {"hello":"world"}
+              ```
+      scoring:
+        min: 1
+    - case_id: "remove_code_fences"
+      messages:
+        - role: user
+          content: |
+            return a json string with key "hello" and value "world" Surround the json in a triple-backtick code fence labelled "json". Do not include any whitespace.
+      processing: 
+        - function: "remove_code_fences"
+      checks: 
+        - function: "is_exact"
+          params: 
+            expected: '{"hello":"world"}'
+      scoring:
+        min: 1
+    - case_id: "remove_code_fences"
+      messages:
+        - role: user
+          content: |
+            return a json string with key "hello" and value "horld" Surround the json in a triple-backtick code fence. Do not include any whitespace. Include a short sentence explaining what the object is.
+      processing: 
+        - function: "extract_json"
+      checks: 
+        - function: "is_exact"
+          params: 
+            expected: '{"hello":"world"}'
+      scoring:
+        min: 1
     - case_id: "3_lines_no_the"
       messages:
         - role: user
           content: |
             Explain how transformers work in LLMs. Your reponse should have 3 short sentences and each sentence must be on a new line. You must not use the word "the".
       processing: 
-        - function: "strip_backticks"
+        - function: "remove_code_fences"
           params: {}
       checks:
         - function: "count_lines"

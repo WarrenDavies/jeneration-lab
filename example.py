@@ -6,6 +6,7 @@ from jenerationlab.storage.storage_manager import StorageManager
 from jenerationlab.metrics.metrics_manager import MetricsManager
 from jenerationlab.benchmarking.benchmarking_manager import BenchmarkingManager
 from jenerationlab.rater.rater import Rater
+from jenerationlab.processing.processing_manager import ProcessingManager
 
 with open("configs/experiment_demo_llm.yaml", 'r') as stream:
     experiment_config = yaml.safe_load(stream)
@@ -15,8 +16,14 @@ with open("configs/core_config.yaml", 'r') as stream:
 
 storage_manager = StorageManager(core_config, experiment_config)
 experiment = Experiment(core_config, experiment_config, storage_manager)
-
-runner = Runner(core_config, experiment_config, experiment, storage_manager)
+processing_manager = ProcessingManager()
+runner = Runner(
+    core_config, 
+    experiment_config, 
+    experiment, 
+    storage_manager,
+    processing_manager
+)
 runner.run()
 
 with open(str(runner.experiment_config_path), 'r') as stream:
