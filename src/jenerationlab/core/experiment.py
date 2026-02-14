@@ -4,6 +4,7 @@ from pathlib import Path
 from itertools import product
 import uuid
 import copy
+import yaml
 
 from jenerationutils.benchmarker.benchmarker import Benchmarker
 
@@ -33,27 +34,36 @@ class Experiment():
 
     def process_benchmarking(self):
         
-        benchmarking_not_defined = "benchmarking" not in self.config
+        benchmarking_is_defined = "benchmarking" in self.config
         format_is_image = self.config["experiment"]["generation_format"] == "image"
+        
+        benchmark_config = None
+        benchmark_evaluator = None
+        
+        if benchmarking_is_defined and not format_is_image:
+            if ("from_file" in self.config["benchmarking"]) and (self.config["benchmarking"]["from_file"]!= ""):
 
-        if benchmarking_not_defined or format_is_image:
-            self.benchmarking_manager = BenchmarkingManager(
-                self.experiment_id,
-                self.storage_manager
-            )
-        else:
-            self.benchmark_evaluator = BenchmarkEvaluator(
+                path = self.config["benchmarking"]["from_file"]
+                with open(path, 'r') as stream:
+                    loaded_benchmark_config = yaml.safe_load(stream)
+                self.config["benchmarking"].update(loaded_benchmark_config)
+        
+            benchmark_config = self.config["benchmarking"]
+
+            benchmark_evaluator = BenchmarkEvaluator(
                 self.experiment_id,
                 self.core_config,
                 self.config["benchmarking"],
                 self.storage_manager
             )
-            self.benchmarking_manager = BenchmarkingManager(
-                self.experiment_id,
-                self.storage_manager,
-                self.benchmark_evaluator,
-                self.config["benchmarking"]
-            )
+
+        self.benchmarking_manager = BenchmarkingManager(
+            self.experiment_id,
+            self.storage_manager,
+            benchmark_evaluator,
+            benchmark_config
+        )
+        if benchmark_config:
             self.variables = (
                 self.benchmarking_manager.remove_message_variables(self.variables)
             )

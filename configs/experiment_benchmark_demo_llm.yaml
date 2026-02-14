@@ -19,10 +19,10 @@ generator:
     top_k: 10
     messages:
       - role: system
-        content: |
+        content: |-
           You are Jenbot, an expert, helpful, and diligent assistant. You provide the user with accurate answers to their queries. You are polite, friendly, and a little sarcastic.
       - role: user
-        content: |
+        content: |-
           Hi who are you?
 
 variables:
@@ -35,10 +35,10 @@ variables:
     dtype: "list"
     items:
       - - role: system
-          content: |
+          content: |-
             You are Jenbot, an expert, helpful, and diligent assistant. You provide the user with accurate answers to their queries. You are polite, friendly, and a little sarcastic.
         - role: user
-          content: |
+          content: |-
             Please write a poem exactly 30 words long. The quality or content of the poem doesn't matter, but it must have exactly 30 words.
 
 metrics:
@@ -49,13 +49,13 @@ benchmarking:
   from_file: ""
   benchmark_system_prompt: 
     role: system
-    content: |
+    content: |-
       You are a helpful AI assistant.
   cases:
     - case_id: "2_x_2"
       messages:
         - role: user
-          content: |
+          content: |-
             What is 2 * 2? Respond only with the answer as an integer
       processing: 
         - function: "remove_code_fences"
@@ -69,12 +69,12 @@ benchmarking:
     - case_id: "keep_code_fences"
       messages:
         - role: user
-          content: |
+          content: |-
             return a json string with key "hello" and value "world" Surround the json in a triple-backtick code fence. Do not include any whitespace.
       checks: 
         - function: "is_exact"
           params: 
-            expected: |
+            expected: |-
               ```
               {"hello":"world"}
               ```
@@ -83,7 +83,7 @@ benchmarking:
     - case_id: "hello_world_json_exact_explanation"
       messages:
         - role: user
-          content: |
+          content: |-
             return a json string with key "hello" and value "world" Surround the json in a triple-backtick code fence. Do not include any whitespace. Include a short sentence explaining what the object is.
       processing: 
         - function: "extract_json"
@@ -97,7 +97,7 @@ benchmarking:
     - case_id: "3_lines_no_the"
       messages:
         - role: user
-          content: |
+          content: |-
             Explain how transformers work in LLMs. Your reponse should have 3 short sentences and each sentence must be on a new line. You must not use the word "the".
       processing: 
         - function: "remove_code_fences"

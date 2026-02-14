@@ -8,7 +8,7 @@ from jenerationlab.benchmarking.benchmarking_manager import BenchmarkingManager
 from jenerationlab.rater.rater import Rater
 from jenerationlab.processing.processing_manager import ProcessingManager
 
-with open("configs/experiment_demo_image.yaml", 'r') as stream:
+with open("configs/experiment_benchmark_demo_llm.yaml", 'r') as stream:
     experiment_config = yaml.safe_load(stream)
 
 with open("configs/core_config.yaml", 'r') as stream:
@@ -25,6 +25,7 @@ runner = Runner(
     processing_manager
 )
 runner.run()
+
 
 with open(str(runner.experiment_config_path), 'r') as stream:
     experiment_config = yaml.safe_load(stream)

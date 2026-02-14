@@ -13,10 +13,17 @@ class BenchmarkingManager():
     """
     """
     def __init__(self, experiment_id, storage_manager, benchmark_evaluator = None, benchmarking_config = DEFAULT_CONFIG):
-        self.is_benchmark_run = benchmarking_config != DEFAULT_CONFIG
-        self.benchmarking_config = benchmarking_config
+        self.benchmarking_config = self.set_benchmarking_config(benchmarking_config)
+        self.is_benchmark_run = self.benchmarking_config != DEFAULT_CONFIG
         self.benchmark_evaluator = benchmark_evaluator
         self.CHECKS_REGISTRY = CHECKS_REGISTRY
+
+
+    def set_benchmarking_config(self, benchmarking_config):
+        if not benchmarking_config:
+            return DEFAULT_CONFIG
+        else:
+            return benchmarking_config
 
 
     def run_check(self, check_name, params, output):
