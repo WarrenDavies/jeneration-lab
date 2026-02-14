@@ -38,7 +38,7 @@ class Runner():
             **experiment_config["experiment"], 
             **experiment_config["generator"]
         }
-        self.ParamsSchema = self.get_params_schema()
+        self.ParamsSchema = self.experiment.generator.get_params_schema()
         self.save_config()
 
 
@@ -76,6 +76,8 @@ class Runner():
     def build_run_context(self, benchmark_run_id, artifact, filename):
 
         run_context = self.run_context.copy()
+
+        run_context.update(self.experiment.generator.config)
 
         run_context["benchmark_run_id"] = benchmark_run_id
         run_context["timestamp"] = self.start_timestamp_str
@@ -287,6 +289,7 @@ class Runner():
 
                 param_changes = self.get_param_changes(inference_config)
                 self.reload_generator_if_needed(inference_config, param_changes)
+
 
                 with Benchmarker() as timer:
                     output = self.experiment.generator.generate()

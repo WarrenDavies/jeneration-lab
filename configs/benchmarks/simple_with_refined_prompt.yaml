@@ -1,0 +1,174 @@
+benchmark_system_prompt: 
+    role: system
+    content: |-
+        You are an AI assistant. Respond accurately to queries and only respond with the answer requested - do not add code fences around JSON, and do not add any additional commentary like "Here's your answer", "Let me know if you need anything else", etc.
+cases:
+    - case_id: "json_easy_2_fields"
+      messages:
+        - role: user
+          content: |-
+              Return a valid json object with the fields name and butler_name. The values should be Tony Stark and Jarvis.
+      checks: 
+        - function: "is_correct_json"
+          params: 
+              expected: 
+                  name: "Tony Stark"
+                  butler_name: "Jarvis"
+      scoring:
+          min: 1
+
+    - case_id: "json_medium_5_fields"
+      messages:
+        - role: user
+          content: |-
+              Return a valid json object with the fields name, butler_name, age, hair_colour, and occupation. The values should be Tony Stark, Jarvis, 40, black, and inventor.
+      checks: 
+        - function: "is_correct_json"
+          params: 
+              expected:
+                  name: "Tony Stark"
+                  butler_name: "Jarvis"
+                  age: "40"
+                  hair_colour: "black"
+                  occupation: "inventor"
+      scoring:
+          min: 1
+
+
+    - case_id: "json_hard_10_fields"
+      messages:
+        - role: user
+          content: |-
+              Return a valid json object with the fields name, butler_name, age, hair_colour, occupation, superhero_identity, spouse_name, favourite_colour, favourite_band, and home_town. The values should be Tony Stark, Jarvis, 40, black, inventor, Iron Man, Pepper Potts, hot rod red, AC/DC, and Malibu. 
+      checks: 
+        - function: "is_correct_json"
+          params: 
+              expected:
+                  name: "Tony Stark"
+                  butler_name: "Jarvis"
+                  age: "40"
+                  hair_colour: "black"
+                  occupation: "inventor"
+                  superhero_identity: "Iron Man"
+                  spouse_name: "Pepper Potts"
+                  favourite_colour: "hot rod red"
+                  favourite_band: "AC/DC"
+                  home_town: "Malibu"      
+      scoring:
+          min: 1
+
+      
+    - case_id: "json_hard_5_fields_gibberish"
+      messages:
+        - role: user
+          content: |-
+              Return a valid json object with the fields groink, frup, hjh8, 9i9i9i. and ZZHHZ. The values should be 090jfgjgf, fp:gfj, 777, qwertp, and 98989756552334. 
+      checks: 
+        - function: "is_correct_json"
+          params: 
+              expected:
+                  groink: "090jfgjgf"
+                  frup: "fp:gfj"
+                  hjh8: "777"
+                  9i9i9i: "qwertp"
+                  ZZHHZ: "98989756552334"
+      scoring:
+          min: 1
+
+    
+    - case_id: "maths_easy"
+      messages:
+        - role: user
+          content: |-
+              What is 9 * 5? Return only the answer as an integer.
+      checks: 
+        - function: "is_exact"
+          params: 
+              expected: "45"
+      scoring:
+          min: 1
+
+    
+    - case_id: "maths_medium"
+      messages:
+        - role: user
+          content: |-
+              What is (9 * 5) - (10 * 2) + 3? Return only the answer as an integer.
+      checks: 
+        - function: "is_exact"
+          params: 
+              expected: "28"
+      scoring:
+          min: 1
+
+
+    - case_id: "maths_hard"
+      messages:
+        - role: user
+          content: |-
+              Solve for m: 2(m + 6) = 48. Return only the answer as an integer.
+      checks: 
+        - function: "is_exact"
+          params: 
+              expected: "18"
+      scoring:
+          min: 1
+
+
+    - case_id: "lexical_constraint_easy"
+      messages:
+        - role: user
+          content: |-
+              Write exactly 3 sentences to explain how LLMs work, each sentence must be on a new line. You must not use the word "the".
+      checks: 
+        - function: "count_lines"
+          params:
+              expected: "3"
+        - function: "contains_word"
+          params:
+              substring: "the"
+              expected: "False"
+      scoring:
+          min: 2
+
+
+    - case_id: "lexical_constraint_medium"
+      messages:
+        - role: user
+          content: |-
+              Write exactly 3 sentences to explain how LLMs work, each sentence must be on a new line. You must include the words "architecture", "realisation", and "power". You must not use the word "the".
+      checks: 
+        - function: "count_lines"
+          params:
+              expected: "3"
+        - function: "contains_word"
+          params:
+              substring: "the"
+              expected: "False"
+        - function: "contains_word"
+          params:
+              substring: "architecture"
+              expected: "True"
+        - function: "contains_word"
+          params:
+              substring: "realisation"
+              expected: "True"
+        - function: "contains_word"
+          params:
+              substring: "power"
+              expected: "True"
+      scoring:
+          min: 5
+
+
+    - case_id: "embedding_granularity"
+      messages:
+        - role: user
+          content: |-
+              How many times does the letter "r" appear in the word "Strawberry". Respond only with the answer as an integer.
+      checks: 
+        - function: "is_exact"
+          params:
+              expected: "3"
+      scoring:
+          min: 1

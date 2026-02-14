@@ -22,7 +22,16 @@ def is_exact(params, output):
 
 @register("is_correct_json")
 def is_correct_json(params, output):
-    parsed = json.loads(output)
+    parsed = ""
+    try:
+        parsed = json.loads(output)
+    except:
+        return {
+            "actual": output,
+            "expected": params["expected"],
+            "score": 0
+        }
+        
     passed = parsed == params["expected"]
     return {
         "actual": output,
