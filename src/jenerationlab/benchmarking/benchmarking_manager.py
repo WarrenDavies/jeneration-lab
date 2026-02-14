@@ -2,9 +2,9 @@ from jenerationlab.benchmarking.checks.functions import CHECKS_REGISTRY
 from jenerationlab.benchmarking.benchmark_evaluator import BenchmarkEvaluator
 
 DEFAULT_CONFIG = {
-    "default": True,
+    "is_not_benchmark_run": True,
     "cases": [
-        {"case_id": None}
+        {"case_id": ""}
     ]
 }
 
@@ -12,7 +12,8 @@ DEFAULT_CONFIG = {
 class BenchmarkingManager():
     """
     """
-    def __init__(self, experiment_id, storage_manager, benchmark_evaluator, benchmarking_config = DEFAULT_CONFIG):
+    def __init__(self, experiment_id, storage_manager, benchmark_evaluator = None, benchmarking_config = DEFAULT_CONFIG):
+        self.is_benchmark_run = benchmarking_config != DEFAULT_CONFIG
         self.benchmarking_config = benchmarking_config
         self.benchmark_evaluator = benchmark_evaluator
         self.CHECKS_REGISTRY = CHECKS_REGISTRY
@@ -40,4 +41,6 @@ class BenchmarkingManager():
 
 
     def evaluate_benchmarks(self, benchmark_run_ids):
+        if not self.benchmark_evaluator:
+            return
         self.benchmark_evaluator.evaluate(benchmark_run_ids)

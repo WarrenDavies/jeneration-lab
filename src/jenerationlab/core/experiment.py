@@ -39,7 +39,6 @@ class Experiment():
         if benchmarking_not_defined or format_is_image:
             self.benchmarking_manager = BenchmarkingManager(
                 self.experiment_id,
-                self.core_config,
                 self.storage_manager
             )
         else:

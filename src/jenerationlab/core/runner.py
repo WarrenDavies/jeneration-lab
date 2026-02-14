@@ -262,7 +262,7 @@ class Runner():
 
 
     def get_benchmark_run_id(self):
-        if "default" in self.experiment.benchmarking_manager.cases[0]:
+        if not self.experiment.benchmarking_manager.is_benchmark_run:
             benchmark_run_id = ""
         else:
             benchmark_run_id = self.create_id()
