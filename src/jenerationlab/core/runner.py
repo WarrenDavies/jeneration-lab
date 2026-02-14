@@ -113,6 +113,13 @@ class Runner():
         return run_context
 
 
+    def dump_to_json_if_dict(self, dict_):
+        if not isinstance(dict_, dict):
+            return dict_
+        return json.dumps(dict_)
+
+
+
     def build_check_run_context(self, run_context, check, check_result):
         check_run_context = run_context
         check_run_context["check_id"] = uuid.uuid4().hex[:8]
@@ -127,8 +134,13 @@ class Runner():
             }),
             sort_keys=True
         )
-        check_run_context["expected"] = check["params"]["expected"]
-        check_run_context["actual"] = check_result["actual"]
+
+        expected = self.dump_to_json_if_dict(check["params"]["expected"])
+        check_run_context["expected"] = expected
+
+        actual = self.dump_to_json_if_dict(check_result["actual"])
+        check_run_context["actual"] = actual
+
         check_run_context["score"] = check_result["score"]
 
         return run_context

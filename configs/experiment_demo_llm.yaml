@@ -66,44 +66,32 @@ benchmarking:
             expected: "4"
       scoring:
         min: 1
-    - case_id: "remove_code_fences"
+    - case_id: "keep_code_fences"
       messages:
         - role: user
           content: |
-            return a json string with key "hello" and value "world" Surround the json in a triple-backtick code fence labelled "json". Do not include any whitespace.
+            return a json string with key "hello" and value "world" Surround the json in a triple-backtick code fence. Do not include any whitespace.
       checks: 
         - function: "is_exact"
           params: 
             expected: |
-              ```json
+              ```
               {"hello":"world"}
               ```
       scoring:
         min: 1
-    - case_id: "remove_code_fences"
+    - case_id: "hello_world_json_exact_explanation"
       messages:
         - role: user
           content: |
-            return a json string with key "hello" and value "world" Surround the json in a triple-backtick code fence labelled "json". Do not include any whitespace.
-      processing: 
-        - function: "remove_code_fences"
-      checks: 
-        - function: "is_exact"
-          params: 
-            expected: '{"hello":"world"}'
-      scoring:
-        min: 1
-    - case_id: "remove_code_fences"
-      messages:
-        - role: user
-          content: |
-            return a json string with key "hello" and value "horld" Surround the json in a triple-backtick code fence. Do not include any whitespace. Include a short sentence explaining what the object is.
+            return a json string with key "hello" and value "world" Surround the json in a triple-backtick code fence. Do not include any whitespace. Include a short sentence explaining what the object is.
       processing: 
         - function: "extract_json"
       checks: 
-        - function: "is_exact"
+        - function: "is_correct_json"
           params: 
-            expected: '{"hello":"world"}'
+            expected: 
+              hello: "world"
       scoring:
         min: 1
     - case_id: "3_lines_no_the"

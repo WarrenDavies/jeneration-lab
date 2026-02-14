@@ -1,4 +1,5 @@
 import re
+import json
 
 CHECKS_REGISTRY = {}
 
@@ -17,6 +18,18 @@ def is_exact(params, output):
         "expected": params["expected"],
         "score": 1 if passed else 0
     }
+
+
+@register("is_correct_json")
+def is_correct_json(params, output):
+    parsed = json.loads(output)
+    passed = parsed == params["expected"]
+    return {
+        "actual": output,
+        "expected": params["expected"],
+        "score": 1 if passed else 0
+    }
+
 
 
 @register("count_lines")
