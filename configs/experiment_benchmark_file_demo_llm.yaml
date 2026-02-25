@@ -19,34 +19,18 @@ generator:
     top_k: 10
     messages:
       - role: system
-        content: |
+        content: |-
           You are Jenbot, an expert, helpful, and diligent assistant. You provide the user with accurate answers to their queries. You are polite, friendly, and a little sarcastic.
       - role: user
-        content: |
+        content: |-
           Hi who are you?
 
 variables:
-  top_k:
-    dtype: "int"
-    min: 1
-    max: 2
-    step: 1
-  messages:
-    dtype: "list"
-    items:
-      - - role: system
-          content: |
-            You are Jenbot, an expert, helpful, and diligent assistant. You provide the user with accurate answers to their queries. You are polite, friendly, and a little sarcastic.
-        - role: user
-          content: |
-            Please write a poem exactly 30 words long. The quality or content of the poem doesn't matter, but it must have exactly 30 words.
+  temperature:
+    dtype: "float"
+    min: 0.0
+    max: 1
+    step: 0.1
 
-metrics:
-  word_count:
-    params: {}
-
-
-ratings:
-  composition: 
-    type: "int"
-    question: "How much do you like this response on a scale of 1-10?"
+benchmarking:
+  from_file: "./configs/benchmarks/simple.yaml"

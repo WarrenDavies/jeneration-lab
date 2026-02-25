@@ -1,6 +1,7 @@
+.test_configs/*
+
 .models/*
 !.models/.gitkeep
-
 
 data/*
 !data/.gitkeep

@@ -4,26 +4,71 @@ from pathlib import Path
 from itertools import product
 import uuid
 import copy
+import yaml
 
 from jenerationutils.benchmarker.benchmarker import Benchmarker
 
 from jenerationlab.variables import registry as variable_registry
 from jenerationlab.core.generators import generator_registries
-
+from jenerationlab.benchmarking.benchmarking_manager import BenchmarkingManager
+from jenerationlab.benchmarking.benchmark_evaluator import BenchmarkEvaluator
 class Experiment():
     """
     """
-    def __init__(self, config):
+    def __init__(self, core_config, experiment_config, storage_manager):
         """
         """
         self.experiment_id = uuid.uuid4().hex[:8]
-        self.config = config
+        self.storage_manager = storage_manager
+        self.benchmarking_manager = None
+        self.core_config = core_config
+        self.config = experiment_config
         self.generator_config = self.process_generator_config()
         self.generator = self.get_generator()
         self.variables = self.define_variables()
         self.inference_configs = self.get_inference_configs()
         self.generator.load()
         self.generator.prepare()
+        self.process_benchmarking()
+
+
+    def process_benchmarking(self):
+        
+        benchmarking_is_defined = "benchmarking" in self.config
+        format_is_image = self.config["experiment"]["generation_format"] == "image"
+        
+        benchmark_config = None
+        benchmark_evaluator = None
+        
+        if benchmarking_is_defined and not format_is_image:
+            if ("from_file" in self.config["benchmarking"]) and (self.config["benchmarking"]["from_file"]!= ""):
+
+                path = self.config["benchmarking"]["from_file"]
+                with open(path, 'r') as stream:
+                    loaded_benchmark_config = yaml.safe_load(stream)
+                self.config["benchmarking"].update(loaded_benchmark_config)
+        
+            benchmark_config = self.config["benchmarking"]
+
+            benchmark_evaluator = BenchmarkEvaluator(
+                self.experiment_id,
+                self.core_config,
+                self.config["benchmarking"],
+                self.storage_manager
+            )
+
+        self.benchmarking_manager = BenchmarkingManager(
+            self.experiment_id,
+            self.storage_manager,
+            benchmark_evaluator,
+            benchmark_config
+        )
+        if benchmark_config:
+            self.variables = (
+                self.benchmarking_manager.remove_message_variables(self.variables)
+            )
+
+        self.benchmarking_manager.create_cases()
 
 
     def process_generator_config(self):
@@ -56,7 +101,7 @@ class Experiment():
         self.generator.load()
         self.generator.prepare()
 
-        
+
     def define_variables(self):
         variables = []
         for variable_name in self.config["variables"]:
