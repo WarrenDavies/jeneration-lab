@@ -311,10 +311,8 @@ class Runner():
                     self.save_metadata("artifacts", run_context)
                     self.save_generation_timing("measurements", run_context)
 
-                    if "checks" not in case:
-                        continue
-
-                    self.run_checks(case, artifact, run_context)
+                    if "checks" in case:
+                        self.run_checks(case, artifact, run_context)
 
         self.save_metadata("experiments", run_context)
 
