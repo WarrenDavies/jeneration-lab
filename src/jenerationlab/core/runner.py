@@ -272,7 +272,7 @@ class Runner():
         return benchmark_run_id
         
 
-    def run(self):
+    def _run_impl(self):
         """
         """
         benchmark_run_ids = []
@@ -317,6 +317,19 @@ class Runner():
         self.save_metadata("experiments", run_context)
 
         self.experiment.benchmarking_manager.evaluate_benchmarks(benchmark_run_ids)
+
+
+    def run(self):
+        with Benchmarker() as experiment_timer:
+            self._run_impl()
+
+        measurement_record = self.build_measurement_record(
+            "",
+            "experiment_run_time",
+            experiment_timer.execution_time
+        )
+        
+        self.save_metadata("measurements", measurement_record)
 
 
     def save_config(self):
