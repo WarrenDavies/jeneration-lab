@@ -123,7 +123,7 @@ class Experiment():
             new_generator_config
         )
         self.generator.load()
-        self.warmup_generator()
+        self.run_warmups()
         self.generator.prepare()
 
 
