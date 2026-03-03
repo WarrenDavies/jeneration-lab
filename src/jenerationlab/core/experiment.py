@@ -12,6 +12,8 @@ from jenerationlab.variables import registry as variable_registry
 from jenerationlab.core.generators import generator_registries
 from jenerationlab.benchmarking.benchmarking_manager import BenchmarkingManager
 from jenerationlab.benchmarking.benchmark_evaluator import BenchmarkEvaluator
+
+
 class Experiment():
     """
     """
@@ -28,8 +30,30 @@ class Experiment():
         self.variables = self.define_variables()
         self.inference_configs = self.get_inference_configs()
         self.generator.load()
+        self.run_warmups()
         self.generator.prepare()
         self.process_benchmarking()
+
+
+    def run_warmups(self):
+        """
+        Calls Generator.warmup() - an initial inference run in order to load the cache etc.
+        Setting "warmup_runs" to False in config will skip this step
+        If the "warmup_runs" key is not present, 2 warmups are performed by default.
+        Note: If warmup is skipped, the first inference run in the experiment will be slower than the rest.
+        """
+        experiment_config = self.config.get("experiment", {})
+        warmup_runs = experiment_config.get("warmup_runs", 2)
+
+        if (not isinstance(warmup_runs, int)) or warmup_runs < 0:
+            warmup_runs = 2
+
+        if warmup_runs == 0:
+            return
+
+        for i in range(warmup_runs):
+            print("warmup run", i + 1, "of", warmup_runs)
+            self.generator.warmup()
 
 
     def process_benchmarking(self):
@@ -99,6 +123,7 @@ class Experiment():
             new_generator_config
         )
         self.generator.load()
+        self.run_warmups()
         self.generator.prepare()
 
 
