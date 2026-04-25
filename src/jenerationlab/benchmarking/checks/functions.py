@@ -69,6 +69,11 @@ def contains_word(params, output):
     pattern = r'\b' + re.escape(params["substring"]) + r'\b'
     contains = bool(re.search(pattern, output))
     passed = str(contains).lower() == str(params["expected"]).lower()
+    print("params:", params)
+    print("output:", output)
+    print("pattern:", pattern)
+    print("contains:", contains)
+    print("passed: ", passed)
     return {
         "actual": str(contains),
         "expected": params["expected"],
