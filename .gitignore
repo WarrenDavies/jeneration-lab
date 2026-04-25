@@ -1,3 +1,19 @@
+configs/*
+core_config.yaml
+!configs/experiment_benchmark_demo_llm.yaml
+!configs/experiment_benchmark_file_demo_llm.yaml
+!configs/experiment_demo_image_multi.yaml
+!configs/experiment_demo_image.yaml
+!configs/experiment_demo_llm_multi.yaml
+!configs/experiment_demo_llm.yaml
+
+configs/benchmarks/*
+!configs/benchmarks/simple_with_refined_prompt_and_processing.yaml
+!configs/benchmarks/simple_with_refined_prompt.yaml
+!configs/benchmarks/simple.yaml
+
+
+
 .test_configs/*
 
 .models/*
