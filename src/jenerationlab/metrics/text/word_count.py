@@ -1,3 +1,5 @@
+import re
+
 from jenerationlab.metrics.base_metric import BaseMetric
 from jenerationlab.metrics.registry import register
 
@@ -9,6 +11,6 @@ class WordCount(BaseMetric):
         super().__init__()
 
         
-    def calculate(self, output):
-        word_count = len(output.lower().split())
+    def calculate(self, text):
+        word_count = len(re.findall(r"\b[\w']+\b", text))
         return word_count
