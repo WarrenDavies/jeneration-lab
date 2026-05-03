@@ -272,6 +272,18 @@ class Runner():
         return benchmark_run_id
         
 
+    def save_artifact_metrics(self, run_context, artifact_metrics):
+        for artifact_metric_name in artifact_metrics:
+
+            measurement_record = self.build_measurement_record(
+                run_context["artifact_id"],
+                artifact_metric_name,
+                artifact_metrics[artifact_metric_name]
+            )
+            
+            self.save_metadata("measurements", measurement_record)
+
+
     def _run_impl(self):
         """
         """
@@ -281,6 +293,7 @@ class Runner():
             if benchmark_run_id:
                 benchmark_run_ids.append(benchmark_run_id)
             for case in self.experiment.benchmarking_manager.cases:
+                print(inference_config["model_path"])
                 if self.experiment_config["experiment"]["reset_model_each_run"]:
                     self.experiment.generator.prepare()
                 
@@ -310,6 +323,7 @@ class Runner():
                     )
                     self.save_metadata("artifacts", run_context)
                     self.save_generation_timing("measurements", run_context)
+                    self.save_artifact_metrics(run_context, artifact.item_extras["metrics"])
 
                     if "checks" in case:
                         self.run_checks(case, artifact, run_context)
