@@ -22,7 +22,7 @@ def get_config():
     core_config["experiments_folders"] = [
         p.name 
         for p in core_config["outputs_path"].iterdir() 
-        if p.is_dir()
+        if p.is_dir() and p.name != "archive"
     ]
 
     return core_config
@@ -39,6 +39,7 @@ def to_readable_timestamp(ts):
 @st.cache_data
 def load_experiment_results(exp_path, experiments_folders, mtime):
     df = pd.read_csv(exp_path, header=0)
+    df["timestamp"] = df["timestamp"].astype(str)
     experiment_exists = df["timestamp"].isin(experiments_folders)
     df = df[experiment_exists]
     return df
@@ -95,9 +96,17 @@ def apply_experiment_filter(
     return df_selected_experiment
 
 
-def add_range_filter(df, col, step, title):
-    min_value = int(df[col].min())
-    max_value = int(df[col].max())
+type_map = {
+    "int": int,
+    "float": float,
+}
+
+def add_range_filter(df, col, step, title, data_type="int"):
+
+    value_type = type_map[data_type]
+
+    min_value = value_type(df[col].min())
+    max_value = value_type(df[col].max())
     if min_value == max_value:
         max_value += 1
     range_ = st.sidebar.slider(
@@ -158,7 +167,6 @@ def render_image_grid(images, df, no_of_cols):
             
             img = Image.open(img_path)
             st.image(img, caption=img_path.name, use_container_width=True)
-
             params_to_display = get_artifact_params(
                 df,
                 img_path.name

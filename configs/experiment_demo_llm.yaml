@@ -30,8 +30,13 @@ variables:
   top_k:
     dtype: "int"
     min: 1
-    max: 2
-    step: 1
+    max: 100
+    step: 20
+  temperature:
+    dtype: "float"
+    min: 0.1
+    max: 1.8
+    step: 0.5
   messages:
     dtype: "list"
     items:
