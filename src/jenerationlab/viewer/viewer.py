@@ -9,7 +9,6 @@ from jenerationlab.viewer import utils
 
 
 config = utils.get_config()
-# st.write(config["outputs_path"])
 #############################
 ####### Process Data ########
 #############################
@@ -18,18 +17,12 @@ df_all_experiments = utils.load_experiment_results(
     config["experiments_folders"],
     config["data_source_path"].stat().st_mtime
 )
-
-df_all_experiments = utils.expand_json_to_cols(
-    df_all_experiments,
-    "params"
-)
-
 experiment_location_map = utils.get_experiment_list(
     df_all_experiments
 )
-# st.write("ijiopj")
-# st.write(experiment_location_map)
 experiment_dropdown_options = list(experiment_location_map.keys())
+
+
 
 
 #############################
@@ -49,56 +42,58 @@ selected_experiment = st.selectbox(
     experiment_dropdown_options,
     index=0
 )
-# st.write("iojhoijoi")
-# st.write(Path(experiment_location_map[selected_experiment]["output_path"]).parent)
 
+selected_experiment_id = experiment_location_map[selected_experiment]["experiment_id"]
+df_artifacts = pd.read_csv("data/artifacts.csv")
+df_artifacts = df_artifacts[df_artifacts["experiment_id"] == selected_experiment_id]
+df_artifacts = utils.expand_json_to_cols(
+    df_artifacts,
+    "params"
+)
 
-
-# st.write(experiment_config)
 df_selected_experiment = utils.apply_experiment_filter(
     df_all_experiments,
     selected_experiment,
     experiment_location_map
 )
-
-steps_range = utils.add_range_filter(
-    df_selected_experiment,
-    "num_inference_steps", 
-    1,
-    "Select Inference Steps Range"
-)
-
-df_selected_experiment = utils.apply_range_filter(
-    df_selected_experiment,
-    "num_inference_steps",
-    steps_range
-)
-
-cfg_range = utils.add_range_filter(
-    df_selected_experiment,
-    "guidance_scale", 
-    1,
-    "Select Guidance Scale Range"
-)
-
-df_selected_experiment = utils.apply_range_filter(
-    df_selected_experiment,
-    "guidance_scale",
-    cfg_range
-)
-
-selected_files = df_selected_experiment["filename"].to_list()
-
+selected_files = df_artifacts["filename"].to_list()
 
 with open(Path(experiment_location_map[selected_experiment]["output_path"]).parent / "experiment.yaml" , 'r') as stream:
     experiment_config = yaml.safe_load(stream)
-st.write(experiment_config)
-
 
 ############################
 #### Display Image Grid ####
 ############################
 if experiment_config["experiment"]["generation_format"] == "image":
+
+    if len(df_artifacts) > 1:
+
+        steps_range = utils.add_range_filter(
+            df_artifacts,
+            "num_inference_steps", 
+            1,
+            "Select Inference Steps Range"
+        )
+
+        df_artifacts = utils.apply_range_filter(
+            df_artifacts,
+            "num_inference_steps",
+            steps_range
+        )
+
+        cfg_range = utils.add_range_filter(
+            df_artifacts,
+            "guidance_scale", 
+            1,
+            "Select Guidance Scale Range"
+        )
+
+        df_artifacts = utils.apply_range_filter(
+            df_artifacts,
+            "guidance_scale",
+            cfg_range
+        )
+
 
     view_mode = st.radio("View Mode", ["Gallery", "Matrix"])
 
@@ -110,8 +105,8 @@ if experiment_config["experiment"]["generation_format"] == "image":
                 }
             </style>
         """, unsafe_allow_html=True)
-        rows = sorted(df_selected_experiment["guidance_scale"].unique())
-        cols = sorted(df_selected_experiment["num_inference_steps"].unique())
+        rows = sorted(df_artifacts["guidance_scale"].unique())
+        cols = sorted(df_artifacts["num_inference_steps"].unique())
 
         st.write(f"**Rows: Guidance Scale | Columns: Inference Steps**")
         header_cols = st.columns([1] + [2 for _ in cols])
@@ -123,14 +118,14 @@ if experiment_config["experiment"]["generation_format"] == "image":
             row_cols[0].write(f"**{str(int(row_val))}**")
             
             for i, col_val in enumerate(cols):
-                match = df_selected_experiment[
-                    (df_selected_experiment["guidance_scale"] == row_val) & 
-                    (df_selected_experiment["num_inference_steps"] == col_val)
+                match = df_artifacts[
+                    (df_artifacts["guidance_scale"] == row_val) & 
+                    (df_artifacts["num_inference_steps"] == col_val)
                 ]
                 
                 with row_cols[i+1]:
                     if not match.empty:
-                        img_path = match.iloc[0]["output_path"] + "/" + match.iloc[0]["filename"] 
+                        img_path = df_selected_experiment.iloc[0]["output_path"] + "/" + match.iloc[0]["filename"] 
                         img = Image.open(img_path)
                         st.image(img)
                     else:
@@ -148,7 +143,7 @@ if experiment_config["experiment"]["generation_format"] == "image":
             st.write("No images found for this experiment.")
             st.write("The experiment folder may have been deleted, or you may need to chill out on your filtering a bit.")
 
-        utils.render_image_grid(images, df_all_experiments, no_of_cols)
+        utils.render_image_grid(images, df_artifacts, no_of_cols)
 
 ##############################
 #### Display Text Outputs ####
